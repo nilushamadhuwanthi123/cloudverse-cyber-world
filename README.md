@@ -4,8 +4,11 @@ An interactive, gamified web experience that turns **Cloud Computing**,
 **DevOps** and **Cybersecurity** concepts into a world you explore rather
 than a dashboard you read.
 
-> **Status: in development.** Step 1 of 18 — project setup. The world
-> itself is built district by district from Step 2 onward.
+[![CI](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml/badge.svg)](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml)
+
+> **Status: in development.** Two of the three districts are playable —
+> Cyber and Cloud — with the shared game layer, persistence and test
+> suite behind them. The world map, DevOps district and Core are next.
 
 ## Concept
 
@@ -28,6 +31,36 @@ Three districts surround a central Core:
 Actions in a district change world health and security score, which the
 Core visualises — so the districts are one system, not three dashboards
 sharing a page.
+
+## What's built
+
+**Cyber District** — a threat runs a Detected → Analyzing → Active
+lifecycle, and the player picks one of three defense actions. The right
+one restores world health, a wrong one escalates, and every action
+carries an explanation, so a wrong answer still teaches. Threat
+generation is system-state based rather than pure random: a district
+already under strain sees proportionally more of its severe threats.
+Alongside it, a firewall panel where switching a rule off starts a slow
+health drain for as long as it stays off, and a mission chain that
+unlocks in order and survives a page refresh.
+
+**Cloud District** — compute, storage and database locations rendered as
+an explorable environment.
+
+**The layer underneath both** — `game/` holds the rules (threat
+lifecycle, severity, security score with a streak bonus, mission unlock
+order, and a risk reading derived from current exposure rather than
+accumulated). `services/` is the async seam over `storage/`, so no
+component reaches for `localStorage` itself and progress survives a
+refresh — including when storage is unavailable, out of quota, or holds
+JSON an older build wrote.
+
+**Quality** — 77 tests across the rule, service and storage layers; lint,
+tests and build run on every pull request; zero axe-core accessibility
+violations on both districts, verified in a real browser rather than by
+eye. See [`docs/TESTING.md`](docs/TESTING.md) and
+[`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured
+and why the coverage line sits where it does.
 
 ## Tech stack
 
@@ -112,10 +145,19 @@ two streams of work rarely touch the same files; where they do meet —
 
 ## Roadmap
 
-Setup · Visual foundation · Intro · World map · Cloud · DevOps · Cyber ·
-Event engine · Game mechanics · Unlocks · Core · Advanced features ·
-Responsive · Accessibility & performance · Testing · Production build ·
-Deployment · Documentation
+| Phase | State |
+|---|---|
+| Setup · Visual foundation · Intro | done |
+| Cyber district | done |
+| Cloud district | done |
+| Game mechanics · Unlocks | done — scoring, missions, unlock order |
+| Responsive · Accessibility & performance | done — zero axe violations |
+| Testing | done — 77 tests, CI on every PR |
+| Documentation | architecture, testing and accessibility docs written |
+| World map | next — a district switcher stands in for now |
+| DevOps district | next |
+| Event engine · Core · Advanced features | not started |
+| Production build · Deployment | build is clean; not deployed yet |
 
 ## Disclaimer
 
