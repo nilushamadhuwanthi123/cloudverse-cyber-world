@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import IntroScreen from './features/intro/IntroScreen'
+import CyberDistrict from './features/cyber/CyberDistrict'
 
 /**
  * Application shell.
@@ -8,6 +9,10 @@ import IntroScreen from './features/intro/IntroScreen'
  * one continuous world rather than a set of pages, so there is no router
  * here on purpose. This stays a plain useState until the world map in
  * Phase 4 gives it something more to track.
+ *
+ * Cyber District is wired in directly for now as a temporary shortcut
+ * past the intro -- Phase 4's world map is what will actually route
+ * visitors to each district once it exists.
  */
 export default function App() {
   const [entered, setEntered] = useState(false)
@@ -16,13 +21,5 @@ export default function App() {
     return <IntroScreen onEnter={() => setEntered(true)} />
   }
 
-  // Placeholder until Phase 4 builds the world map.
-  return (
-    <main className="app-placeholder">
-      <p>World map arrives in Phase 4.</p>
-      <button type="button" onClick={() => setEntered(false)}>
-        Back to intro
-      </button>
-    </main>
-  )
+  return <CyberDistrict onExit={() => setEntered(false)} />
 }
