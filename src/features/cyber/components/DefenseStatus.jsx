@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { DEFENSE_RULES } from '../../../game/defenseRules'
 import './DefenseStatus.css'
 
@@ -15,16 +15,12 @@ const DECAY_AMOUNT = 1
  * health drain for as long as it stays off -- turning a defense off is
  * not free, even though nothing is actively attacking at that exact
  * moment. Switching it back on stops the drain immediately.
+ *
+ * Rule state is owned by CyberDistrict rather than here: the mission
+ * layer needs to know whether every defense was on at the moment a
+ * threat was resolved, which makes it district state, not panel state.
  */
-export default function DefenseStatus({ onHealthChange }) {
-  const [ruleStates, setRuleStates] = useState(() =>
-    Object.fromEntries(DEFENSE_RULES.map((rule) => [rule.id, true]))
-  )
-
-  function toggleRule(ruleId) {
-    setRuleStates((current) => ({ ...current, [ruleId]: !current[ruleId] }))
-  }
-
+export default function DefenseStatus({ ruleStates, onToggleRule, onHealthChange }) {
   useEffect(() => {
     const hasOffRule = Object.values(ruleStates).some((isOn) => !isOn)
     if (!hasOffRule) return undefined
@@ -49,7 +45,7 @@ export default function DefenseStatus({ onHealthChange }) {
             <button
               type="button"
               className={`defense-status__toggle defense-status__toggle--${isOn ? 'on' : 'off'}`}
-              onClick={() => toggleRule(rule.id)}
+              onClick={() => onToggleRule(rule.id)}
               aria-pressed={isOn}
             >
               {isOn ? 'ON' : 'OFF'}
