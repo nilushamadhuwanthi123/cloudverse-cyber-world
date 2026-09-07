@@ -243,9 +243,8 @@ export default function CloudDistrict({ onBackToIntro }) {
                   id={`location-node-${loc.id}`}
                   className={`cloud-node ${isSelected ? 'cloud-node--selected' : ''}`}
                   onClick={() => handleSelect(loc.id)}
-                  aria-pressed={isSelected}
                   aria-expanded={isSelected}
-                  aria-controls="cloud-detail-panel"
+                  aria-controls={isSelected ? 'cloud-detail-panel' : undefined}
                   aria-label={`${loc.title} - ${loc.subtitle}. Click to inspect sector.`}
                 >
                   <div className="cloud-node__top">
