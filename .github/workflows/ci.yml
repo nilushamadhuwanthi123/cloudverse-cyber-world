@@ -1,0 +1,32 @@
+name: CI
+
+# Runs on every pull request and on pushes to main, so a change that
+# breaks the build, the lint rules or the test suite is caught before
+# it is merged rather than after.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # npm ci rather than npm install: it installs exactly what the
+      # lockfile pins, so CI cannot pass on a different dependency tree
+      # than the one committed.
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm test
+
+      - run: npm run build
