@@ -373,7 +373,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wider);
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .cloud-node--selected .cloud-node__code-badge {
@@ -423,7 +423,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wide);
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .cloud-node--selected .cloud-node__indicator {
