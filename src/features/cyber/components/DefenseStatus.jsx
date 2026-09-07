@@ -19,6 +19,11 @@ const DECAY_AMOUNT = 1
  * Rule state is owned by CyberDistrict rather than here: the mission
  * layer needs to know whether every defense was on at the moment a
  * threat was resolved, which makes it district state, not panel state.
+ *
+ * Each toggle carries an aria-label naming its rule. Without it a
+ * screen reader announces four consecutive buttons all called "ON",
+ * with no way to tell which defense is which -- the visible label sits
+ * in a sibling element, so the button alone has nothing to say.
  */
 export default function DefenseStatus({ ruleStates, onToggleRule, onHealthChange }) {
   useEffect(() => {
@@ -47,6 +52,7 @@ export default function DefenseStatus({ ruleStates, onToggleRule, onHealthChange
               className={`defense-status__toggle defense-status__toggle--${isOn ? 'on' : 'off'}`}
               onClick={() => onToggleRule(rule.id)}
               aria-pressed={isOn}
+              aria-label={rule.label}
             >
               {isOn ? 'ON' : 'OFF'}
             </button>

@@ -38,11 +38,14 @@
   line-height: 1.5;
 }
 
+/* text-secondary rather than text-muted: at 12px this is body copy a
+   player is expected to read, and muted lands under the 4.5:1 contrast
+   minimum against the panel background. */
 .threat-panel__waiting {
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   letter-spacing: var(--tracking-wide);
 }
 

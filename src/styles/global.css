@@ -68,6 +68,41 @@ code, kbd, samp, pre {
   color: var(--text-primary);
 }
 
+/* ---- Skip link ---------------------------------------------------
+   Offscreen until focused, then pinned to the top-left. A keyboard
+   user landing on the page can jump straight past the panels instead
+   of tabbing through every control to reach the content.
+
+   Moved with a positive `top` rather than `display: none`, because a
+   hidden element cannot receive focus and the link would never
+   appear.                                                           */
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: var(--space-3);
+  z-index: var(--z-overlay);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: top var(--dur-fast) var(--ease-out);
+}
+
+.skip-link:focus {
+  top: var(--space-3);
+}
+
+/* The main region is focused programmatically when the skip link is
+   used, so it takes tabIndex={-1}. It must not then draw a focus ring
+   around the entire page. */
+main:focus {
+  outline: none;
+}
+
 /* ---- Reduced motion (36) -----------------------------------------
    For people with vestibular disorders, motion can cause real
    nausea. Near-zero rather than `none` so animation end events still
