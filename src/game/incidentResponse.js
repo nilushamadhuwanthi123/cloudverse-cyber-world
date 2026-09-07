@@ -74,6 +74,35 @@ export function canTransition(from, to) {
   return (ALLOWED_TRANSITIONS[from] ?? []).includes(to)
 }
 
+/**
+ * Picks which case to open next.
+ *
+ * Like threat generation, this reads system state rather than rolling
+ * dice in a vacuum: a district already under strain draws its heavier
+ * cases more often. Cases already worked are skipped while any remain
+ * unseen, so a session moves through the catalogue instead of repeating
+ * the first one it liked.
+ */
+export function pickIncidentCase(cases, { worldHealth = 100, seenIds = [] } = {}, rng = Math.random) {
+  const unseen = cases.filter((c) => !seenIds.includes(c.id))
+  const pool = unseen.length > 0 ? unseen : cases
+  if (pool.length === 0) return null
+
+  const strained = worldHealth < 60
+  const weights = pool.map((c) => {
+    const heavy = c.severity === 'high' || c.severity === 'critical'
+    return strained && heavy ? 2 : 1
+  })
+
+  const total = weights.reduce((sum, w) => sum + w, 0)
+  let roll = rng() * total
+  for (let i = 0; i < pool.length; i += 1) {
+    roll -= weights[i]
+    if (roll <= 0) return pool[i]
+  }
+  return pool[pool.length - 1]
+}
+
 let nextIncidentId = 1
 
 /**

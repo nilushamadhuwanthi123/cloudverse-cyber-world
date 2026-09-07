@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   INCIDENT_STATE,
+  pickIncidentCase,
   canTransition,
   escalateIncident,
   isTerminal,
@@ -252,5 +253,50 @@ describe('responseTimeline', () => {
     const incident = openIncident(CASE, fakeClock())
     expect(responseTimeline(incident).resolved).toBe(false)
     expect(responseTimeline(incident).stages).toEqual([])
+  })
+})
+
+describe('pickIncidentCase', () => {
+  const cases = [
+    { id: 'a', severity: 'low' },
+    { id: 'b', severity: 'critical' },
+    { id: 'c', severity: 'high' },
+  ]
+
+  it('returns null when there is nothing to pick', () => {
+    expect(pickIncidentCase([], {})).toBeNull()
+  })
+
+  it('is deterministic for a given roll', () => {
+    const first = pickIncidentCase(cases, {}, () => 0)
+    expect(pickIncidentCase(cases, {}, () => 0)).toBe(first)
+  })
+
+  it('always returns a known case across the roll range', () => {
+    for (const roll of [0, 0.25, 0.5, 0.75, 0.999999]) {
+      expect(cases).toContain(pickIncidentCase(cases, {}, () => roll))
+    }
+  })
+
+  it('skips cases already worked while any remain unseen', () => {
+    for (const roll of [0, 0.4, 0.9]) {
+      const picked = pickIncidentCase(cases, { seenIds: ['a', 'b'] }, () => roll)
+      expect(picked.id).toBe('c')
+    }
+  })
+
+  it('starts the catalogue over once every case has been seen', () => {
+    const picked = pickIncidentCase(cases, { seenIds: ['a', 'b', 'c'] }, () => 0)
+    expect(cases).toContain(picked)
+  })
+
+  it('draws heavier cases more often when the district is strained', () => {
+    const isHeavy = (c) => c.severity === 'high' || c.severity === 'critical'
+    const rolls = Array.from({ length: 60 }, (_, i) => i / 60)
+
+    const healthy = rolls.filter((r) => isHeavy(pickIncidentCase(cases, { worldHealth: 100 }, () => r))).length
+    const strained = rolls.filter((r) => isHeavy(pickIncidentCase(cases, { worldHealth: 30 }, () => r))).length
+
+    expect(strained).toBeGreaterThan(healthy)
   })
 })
