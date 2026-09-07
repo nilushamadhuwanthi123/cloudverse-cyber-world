@@ -1,6 +1,6 @@
 /* ============================================================
    CLOUD DISTRICT — VISUAL ENVIRONMENT (STEP 1)
-   Follows src/styles/tokens.css strictly. Zero raw hex codes.
+   Uses src/styles/tokens.css variables where possible; some rgba() values are used for alpha glows/overlays. No raw hex codes.
    ============================================================ */
 
 .cloud-district {
