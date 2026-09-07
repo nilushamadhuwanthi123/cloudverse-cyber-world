@@ -1,0 +1,132 @@
+/*
+ * Cyber District shell.
+ *
+ * Every colour, space and duration below comes from tokens.css -- same
+ * rule as the intro screen, so the districts read as one product once
+ * two people are building them.
+ */
+
+.cyber-district {
+  position: relative;
+  min-height: 100dvh;
+  padding: var(--space-7) var(--space-5) var(--space-6);
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.cyber-district__eyebrow {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wider);
+  color: var(--district-cyber-primary);
+  opacity: 0;
+}
+
+.cyber-district__title {
+  margin: 0 0 var(--space-6);
+  font-size: clamp(1.75rem, 6vw, var(--text-3xl));
+  font-weight: 700;
+  color: var(--text-primary);
+  opacity: 0;
+}
+
+.cyber-district__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-5);
+}
+
+.cyber-district__panel {
+  opacity: 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--glass-blur));
+  padding: var(--space-5);
+}
+
+.cyber-district__panel-heading {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cyber-district__panel-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cyber-district__severity-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Severity badge -- shared shape, colour driven by --badge-color set
+   inline per level so this file never hardcodes a severity colour. */
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  color: var(--badge-color);
+  background: transparent;
+  border: 1px solid var(--badge-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.severity-badge:hover {
+  background: color-mix(in srgb, var(--badge-color) 12%, transparent);
+}
+
+.severity-badge--active {
+  background: color-mix(in srgb, var(--badge-color) 16%, transparent);
+  box-shadow: 0 0 0 1px var(--badge-color);
+}
+
+.severity-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--badge-color);
+  flex-shrink: 0;
+}
+
+.cyber-district__exit {
+  margin-top: var(--space-7);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.cyber-district__exit:hover:not(:disabled) {
+  border-color: var(--district-cyber-primary);
+}
+
+.cyber-district__exit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (max-width: 480px) {
+  .cyber-district__exit {
+    width: 100%;
+  }
+}
