@@ -1,0 +1,682 @@
+/* ============================================================
+   CLOUD DISTRICT — VISUAL ENVIRONMENT (STEP 1)
+   Uses src/styles/tokens.css variables where possible; some rgba() values are used for alpha glows/overlays. No raw hex codes.
+   ============================================================ */
+
+.cloud-district {
+  position: relative;
+  min-height: 100dvh;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Faint digital matrix backdrop */
+.cloud-district__grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+  background-size: var(--space-8) var(--space-8);
+  opacity: 0.35;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 85%);
+}
+
+/* Ambient glow pools */
+.cloud-district__ambient-glow {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50rem;
+  height: 25rem;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 229, 255, 0.08),
+    rgba(59, 130, 246, 0.04) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+/* ------------------------------------------------------------
+   HUD TOP BAR
+   ------------------------------------------------------------ */
+
+.cloud-district__hud {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-panel);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.cloud-district__hud-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.cloud-district__hud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--district-cloud-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+}
+
+.cloud-district__beacon-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-stable);
+  box-shadow: 0 0 8px var(--status-stable);
+}
+
+.cloud-district__hud-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.cloud-district__hud-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.cloud-district__nav-btn {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.cloud-district__nav-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.cloud-district__nav-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------
+   MAIN WORLD CANVAS
+   ------------------------------------------------------------ */
+
+.cloud-district__canvas {
+  position: relative;
+  flex: 1;
+  max-width: 78rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  z-index: var(--z-base);
+}
+
+/* Header Banner */
+.cloud-district__header {
+  text-align: center;
+  max-width: 44rem;
+  margin: 0 auto var(--space-4);
+}
+
+.cloud-district__tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.cloud-district__title {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.cloud-district__subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------
+   TOPOLOGY NETWORK & SVG CONDUITS
+   ------------------------------------------------------------ */
+
+.cloud-district__topology {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* SVG Circuit Interconnect Overlay (desktop view) */
+.cloud-district__conduits-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cloud-district__conduit-path {
+  fill: none;
+  stroke: var(--border-subtle);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
+  transition: stroke var(--dur-base) var(--ease-out), stroke-width var(--dur-base) var(--ease-out);
+}
+
+.cloud-district__conduit-path--active {
+  stroke: var(--district-cloud-primary);
+  stroke-width: 2;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 6px var(--district-cloud-primary));
+}
+
+/* Core Nexus Anchor */
+.cloud-district__nexus-indicator {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--district-cloud-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  margin: var(--space-2) auto;
+  z-index: 1;
+}
+
+.cloud-district__nexus-core-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--core-gradient);
+}
+
+/* Locations Layout Grid */
+.cloud-district__locations-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+/* ------------------------------------------------------------
+   LOCATION NODE CARD (SEMANTIC BUTTON)
+   ------------------------------------------------------------ */
+
+.cloud-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  cursor: pointer;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+}
+
+/* Corner bracket accents */
+.cloud-node::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid var(--border-strong);
+  border-left: 2px solid var(--border-strong);
+  border-top-left-radius: var(--radius-lg);
+  pointer-events: none;
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+
+.cloud-node::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 2px solid var(--border-strong);
+  border-right: 2px solid var(--border-strong);
+  border-bottom-right-radius: var(--radius-lg);
+  pointer-events: none;
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+
+.cloud-node:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-active);
+  box-shadow: var(--glow-cyan);
+  background: var(--surface-1);
+}
+
+.cloud-node:hover::before,
+.cloud-node:hover::after {
+  border-color: var(--accent-primary);
+}
+
+.cloud-node:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+/* Active / Selected Node State */
+.cloud-node--selected {
+  border-color: var(--district-cloud-primary);
+  background: var(--surface-2);
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+.cloud-node--selected::before,
+.cloud-node--selected::after {
+  border-color: var(--district-cloud-primary);
+}
+
+/* Node Header & Glyph */
+.cloud-node__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.cloud-node__glyph-wrapper {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--district-cloud-primary);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.cloud-node:hover .cloud-node__glyph-wrapper,
+.cloud-node--selected .cloud-node__glyph-wrapper {
+  background: var(--surface-2);
+  border-color: var(--border-active);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+}
+
+.cloud-node__glyph {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.cloud-node__code-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-muted);
+}
+
+.cloud-node--selected .cloud-node__code-badge {
+  color: var(--accent-primary);
+}
+
+/* Node Titles & Description */
+.cloud-node__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+  text-transform: uppercase;
+}
+
+.cloud-node__subtitle {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-wide);
+  color: var(--district-cloud-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.cloud-node__desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-4);
+  flex-grow: 1;
+}
+
+/* Node Footer & State Indicators */
+.cloud-node__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-3);
+  margin-top: auto;
+}
+
+.cloud-node__indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+}
+
+.cloud-node--selected .cloud-node__indicator {
+  color: var(--status-stable);
+}
+
+.cloud-node__pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.cloud-node--selected .cloud-node__pulse {
+  background: var(--status-stable);
+  box-shadow: 0 0 8px var(--status-stable);
+}
+
+.cloud-node__affordance {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+
+/* ------------------------------------------------------------
+   INSPECTION DETAIL PANEL (HUD)
+   ------------------------------------------------------------ */
+
+.cloud-detail {
+  position: relative;
+  background: var(--glass-bg);
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glow-cyan);
+  margin-top: var(--space-4);
+  animation: cloudDetailFadeIn var(--dur-base) var(--ease-out);
+}
+
+@keyframes cloudDetailFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cloud-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.cloud-detail__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  margin-bottom: var(--space-2);
+}
+
+.cloud-detail__code {
+  color: var(--district-cloud-primary);
+  background: var(--surface-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.cloud-detail__coords {
+  color: var(--text-muted);
+}
+
+.cloud-detail__title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: var(--space-1);
+}
+
+.cloud-detail__subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.cloud-detail__close {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.cloud-detail__close:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.cloud-detail__close:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Detail Body: Telemetry Grid & Architecture Highlights */
+.cloud-detail__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+.cloud-detail__section-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.cloud-detail__telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.cloud-detail__stat-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.cloud-detail__stat-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: var(--space-1);
+}
+
+.cloud-detail__stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--district-cloud-primary);
+}
+
+.cloud-detail__features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cloud-detail__feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.cloud-detail__feature-bullet {
+  font-family: var(--font-mono);
+  color: var(--accent-primary);
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE DESIGN
+   ------------------------------------------------------------ */
+
+@media (max-width: 960px) {
+  .cloud-district__locations-grid {
+    grid-template-columns: 1fr;
+    max-width: 38rem;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .cloud-district__conduits-svg {
+    display: none;
+  }
+
+  .cloud-detail__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 640px) {
+  .cloud-district__canvas {
+    padding: var(--space-4) var(--space-3) var(--space-6);
+  }
+
+  .cloud-district__hud {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .cloud-district__title {
+    font-size: var(--text-2xl);
+  }
+
+  .cloud-node {
+    padding: var(--space-4);
+  }
+
+  .cloud-detail {
+    padding: var(--space-4);
+  }
+
+  .cloud-detail__telemetry-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ------------------------------------------------------------
+   REDUCED MOTION
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud-district,
+  .cloud-district *,
+  .cloud-node,
+  .cloud-detail {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
