@@ -1,70 +1,112 @@
-/*
- * Temporary district chooser -- stands in for the world map until that
- * phase lands, at which point this file goes away with it. Tokens only,
- * same rule as every other file.
- */
-
-.district-chooser {
-  min-height: 100dvh;
+/* District Switcher HUD bar */
+.district-nav {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  padding: var(--space-6) var(--space-5);
-  text-align: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: var(--surface-glass, rgba(10, 16, 36, 0.85));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.14));
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  font-family: var(--font-sans);
 }
 
-.district-chooser__title {
-  margin: 0;
-  font-size: clamp(1.75rem, 6vw, var(--text-3xl));
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.district-chooser__note {
-  margin: 0;
-  max-width: 32rem;
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.district-chooser__options {
+.district-nav__brand {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-4);
-  margin-top: var(--space-3);
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.district-chooser__option {
-  padding: var(--space-4) var(--space-6);
-  font-size: var(--text-lg);
+.district-nav__tag {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.district-nav__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--status-stable, #22e6a7);
+  box-shadow: 0 0 8px var(--status-stable, #22e6a7);
+}
+
+.district-nav__tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(5, 8, 22, 0.6);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.14));
+}
+
+.district-nav__tab {
+  padding: 0.45rem 1rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8125rem;
+  letter-spacing: 0.05em;
   font-weight: 600;
-  color: var(--text-primary);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
   cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
+  transition: all 0.2s ease;
 }
 
-.district-chooser__option:hover {
-  border-color: var(--accent-primary);
-  transform: translateY(-2px);
+.district-nav__tab:hover {
+  color: var(--text-primary, #f1f5ff);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .district-chooser__option:hover {
-    transform: none;
+.district-nav__tab--active {
+  color: var(--accent-primary, #00e5ff);
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+}
+
+.district-nav__tab:focus-visible {
+  outline: 2px solid var(--accent-primary, #00e5ff);
+  outline-offset: 2px;
+}
+
+.district-nav__exit-btn {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+  background: transparent;
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.2));
+  padding: 0.4rem 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.district-nav__exit-btn:hover {
+  color: var(--text-primary, #f1f5ff);
+  border-color: var(--border-strong, rgba(148, 163, 184, 0.4));
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 640px) {
+  .district-nav {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
   }
-}
-
-@media (max-width: 480px) {
-  .district-chooser__option {
-    width: 100%;
+  .district-nav__brand {
+    display: none;
   }
 }

@@ -1,71 +1,81 @@
 import { useState } from 'react'
 import IntroScreen from './features/intro/IntroScreen'
-import CloudDistrict from './features/cloud/CloudDistrict'
 import CyberDistrict from './features/cyber/CyberDistrict'
+import CloudDistrict from './features/cloud/CloudDistrict'
 import './App.css'
 
 /**
- * Application shell.
+ * Application shell with District Switcher.
  *
- * "Which screen am I on" is application state, not a URL -- CLOUDVERSE is
- * one continuous world rather than a set of pages, so there is no router
- * here on purpose. This stays a plain useState until the world map in
- * Phase 4 gives it something more to track.
- *
- * Two districts exist now, and the world map that will route between
- * them properly does not, so the intro leads to a temporary chooser
- * rather than to one hard-coded district. It is deliberately plain: the
- * moment the world map lands, this whole branch is deleted rather than
- * restyled.
- *
- * The <main> landmark and skip link live here rather than in each
- * screen: there is exactly one main region in the app at a time, and
- * putting it at the shell means a screen that gets added later cannot
- * forget it. The skip link is the first thing in the tab order so a
- * keyboard user can jump the panels instead of walking every control.
+ * Allows exploration of both Cloud District (District 01) and
+ * Cyber District (District 02) until the full Phase 4 World Map
+ * is implemented.
  */
 export default function App() {
-  const [screen, setScreen] = useState('intro')
-
-  const backToChooser = () => setScreen('chooser')
+  const [entered, setEntered] = useState(false)
+  const [district, setDistrict] = useState('cloud')
 
   return (
     <>
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
+
+      {entered && (
+        <nav className="district-nav" aria-label="District Navigation">
+          <div className="district-nav__brand">
+            <span className="district-nav__tag">
+              <span className="district-nav__pulse" aria-hidden="true" />
+              CLOUDVERSE // SECTOR HUB
+            </span>
+          </div>
+
+          <div className="district-nav__tabs" role="tablist" aria-label="Districts">
+            <button
+              type="button"
+              role="tab"
+              id="tab-cloud"
+              aria-selected={district === 'cloud'}
+              aria-controls="main-content"
+              className={`district-nav__tab ${district === 'cloud' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setDistrict('cloud')}
+            >
+              ☁️ Cloud District
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-cyber"
+              aria-selected={district === 'cyber'}
+              aria-controls="main-content"
+              className={`district-nav__tab ${district === 'cyber' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setDistrict('cyber')}
+            >
+              🛡️ Cyber District
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="district-nav__exit-btn"
+            onClick={() => setEntered(false)}
+          >
+            &larr; Exit to Intro
+          </button>
+        </nav>
+      )}
+
       <main id="main-content" tabIndex={-1}>
-        {screen === 'intro' && <IntroScreen onEnter={() => setScreen('chooser')} />}
-        {screen === 'cyber' && <CyberDistrict onExit={backToChooser} />}
-        {screen === 'cloud' && <CloudDistrict onBackToIntro={backToChooser} />}
-        {screen === 'chooser' && (
-          <section className="district-chooser" aria-labelledby="district-chooser-title">
-            <h1 id="district-chooser-title" className="district-chooser__title">
-              Choose a district
-            </h1>
-            <p className="district-chooser__note">
-              The world map arrives in a later phase. Until then, pick a
-              district directly.
-            </p>
-            <div className="district-chooser__options">
-              <button
-                type="button"
-                className="district-chooser__option"
-                onClick={() => setScreen('cyber')}
-              >
-                🛡 Cyber District
-              </button>
-              <button
-                type="button"
-                className="district-chooser__option"
-                onClick={() => setScreen('cloud')}
-              >
-                ☁ Cloud District
-              </button>
-            </div>
-          </section>
+        {!entered ? (
+          <IntroScreen onEnter={() => setEntered(true)} />
+        ) : district === 'cloud' ? (
+          <CloudDistrict onBackToIntro={() => setEntered(false)} />
+        ) : (
+          <CyberDistrict onExit={() => setEntered(false)} />
         )}
       </main>
     </>
   )
 }
+
+
