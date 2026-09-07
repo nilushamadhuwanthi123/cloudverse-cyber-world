@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import IntroScreen from './features/intro/IntroScreen'
+import CloudDistrict from './features/cloud/CloudDistrict'
 import CyberDistrict from './features/cyber/CyberDistrict'
+import './App.css'
 
 /**
  * Application shell.
@@ -10,9 +12,11 @@ import CyberDistrict from './features/cyber/CyberDistrict'
  * here on purpose. This stays a plain useState until the world map in
  * Phase 4 gives it something more to track.
  *
- * Cyber District is wired in directly for now as a temporary shortcut
- * past the intro -- Phase 4's world map is what will actually route
- * visitors to each district once it exists.
+ * Two districts exist now, and the world map that will route between
+ * them properly does not, so the intro leads to a temporary chooser
+ * rather than to one hard-coded district. It is deliberately plain: the
+ * moment the world map lands, this whole branch is deleted rather than
+ * restyled.
  *
  * The <main> landmark and skip link live here rather than in each
  * screen: there is exactly one main region in the app at a time, and
@@ -21,7 +25,9 @@ import CyberDistrict from './features/cyber/CyberDistrict'
  * keyboard user can jump the panels instead of walking every control.
  */
 export default function App() {
-  const [entered, setEntered] = useState(false)
+  const [screen, setScreen] = useState('intro')
+
+  const backToChooser = () => setScreen('chooser')
 
   return (
     <>
@@ -29,13 +35,37 @@ export default function App() {
         Skip to main content
       </a>
       <main id="main-content" tabIndex={-1}>
-        {entered ? (
-          <CyberDistrict onExit={() => setEntered(false)} />
-        ) : (
-          <IntroScreen onEnter={() => setEntered(true)} />
+        {screen === 'intro' && <IntroScreen onEnter={() => setScreen('chooser')} />}
+        {screen === 'cyber' && <CyberDistrict onExit={backToChooser} />}
+        {screen === 'cloud' && <CloudDistrict onBackToIntro={backToChooser} />}
+        {screen === 'chooser' && (
+          <section className="district-chooser" aria-labelledby="district-chooser-title">
+            <h1 id="district-chooser-title" className="district-chooser__title">
+              Choose a district
+            </h1>
+            <p className="district-chooser__note">
+              The world map arrives in a later phase. Until then, pick a
+              district directly.
+            </p>
+            <div className="district-chooser__options">
+              <button
+                type="button"
+                className="district-chooser__option"
+                onClick={() => setScreen('cyber')}
+              >
+                🛡 Cyber District
+              </button>
+              <button
+                type="button"
+                className="district-chooser__option"
+                onClick={() => setScreen('cloud')}
+              >
+                ☁ Cloud District
+              </button>
+            </div>
+          </section>
         )}
       </main>
     </>
   )
 }
-
