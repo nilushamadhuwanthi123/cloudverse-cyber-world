@@ -4,6 +4,7 @@ import { DEFENSE_RULES } from '../../game/defenseRules'
 import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
 import { applyResponseToScore, INITIAL_SECURITY_SCORE_STATE } from '../../game/securityScore'
 import { INITIAL_PROGRESS, missionsWithStatus, recordResponse } from '../../game/missionState'
+import { assessRisk } from '../../game/riskScore'
 import { loadProgress, saveProgress } from '../../services/progressService'
 import {
   motionTimeline,
@@ -124,6 +125,7 @@ export default function CyberDistrict({ onExit }) {
   }, [])
 
   const missions = missionsWithStatus(progress)
+  const risk = assessRisk({ worldHealth, ruleStates })
 
   return (
     <section ref={rootRef} className="cyber-district" aria-labelledby="cyber-district-title">
@@ -150,6 +152,16 @@ export default function CyberDistrict({ onExit }) {
             {scoreState.streak > 1 && (
               <span className="cyber-district__score-streak">{scoreState.streak}x streak</span>
             )}
+          </div>
+          <div
+            className="cyber-district__risk"
+            role="status"
+            aria-label={`Risk ${risk.value}, ${risk.level}`}
+          >
+            <span className="cyber-district__risk-label">Risk</span>
+            <span className={`cyber-district__risk-value cyber-district__risk-value--${risk.level}`}>
+              {risk.value}
+            </span>
           </div>
         </div>
       </div>
