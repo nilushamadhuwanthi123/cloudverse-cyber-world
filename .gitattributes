@@ -1,0 +1,22 @@
+# Normalise line endings.
+#
+# Two people on two machines will otherwise commit the same file with
+# different endings, and every line of it shows as changed in the diff --
+# which buries real changes and causes merge conflicts in files neither
+# person meaningfully edited.
+#
+# Text files are stored with LF in the repository. Git still checks them
+# out with whatever each developer's platform prefers, so nothing about
+# working on Windows changes.
+* text=auto eol=lf
+
+# Binary files must never be touched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
