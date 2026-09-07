@@ -8,6 +8,7 @@ import {
   settleIfReduced,
   stopMotion,
 } from '../../lib/motion'
+import DefenseStatus from './components/DefenseStatus'
 import SeverityBadge from './components/SeverityBadge'
 import ThreatPanel from './components/ThreatPanel'
 import './CyberDistrict.css'
@@ -133,10 +134,7 @@ export default function CyberDistrict({ onExit }) {
           <h2 id="defense-status-heading" className="cyber-district__panel-heading">
             Defense Status
           </h2>
-          <p className="cyber-district__panel-note">
-            Firewall simulation and game integration arrive in a later
-            phase.
-          </p>
+          <DefenseStatus onHealthChange={applyHealthDelta} />
         </article>
       </div>
 
