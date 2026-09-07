@@ -35,7 +35,7 @@ const STAGE_LABEL = {
  * into that engine. Design (threat types, lifecycle, scoring) is
  * Kavindu's.
  */
-export default function ThreatPanel({ worldHealth, onHealthChange }) {
+export default function ThreatPanel({ worldHealth, onHealthChange, onScoreChange }) {
   const [threat, setThreat] = useState(() => spawnThreat(worldHealth))
   const timerRef = useRef(null)
 
@@ -64,6 +64,7 @@ export default function ThreatPanel({ worldHealth, onHealthChange }) {
     const { threat: resolved, healthDelta } = resolveThreatResponse(threat, actionId)
     setThreat(resolved)
     onHealthChange(healthDelta)
+    onScoreChange(resolved.resolution.correct)
   }
 
   function nextThreat() {

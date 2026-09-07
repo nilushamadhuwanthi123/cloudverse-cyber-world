@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { stagger } from 'animejs'
 import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
+import { applyResponseToScore, INITIAL_SECURITY_SCORE_STATE } from '../../game/securityScore'
 import {
   motionTimeline,
   prefersReducedMotion,
@@ -22,9 +23,12 @@ const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical']
  * except Incident Response, which now runs on the threat engine in
  * game/threatEngine.js (design: Kavindu).
  *
- * World health lives here rather than inside ThreatPanel because the
- * header needs to show it too -- it is district-level state, not
- * panel-level state.
+ * World health and security score both live here rather than inside
+ * ThreatPanel because the header needs to show them too -- they are
+ * district-level state, not panel-level state. World health is the
+ * district's current condition; security score is a running record of
+ * how well the player has been performing (game/securityScore.js,
+ * design: Kavindu).
  */
 export default function CyberDistrict({ onExit }) {
   const rootRef = useRef(null)
@@ -32,9 +36,14 @@ export default function CyberDistrict({ onExit }) {
   const [ready, setReady] = useState(prefersReducedMotion)
   const [activeSeverity, setActiveSeverity] = useState('low')
   const [worldHealth, setWorldHealth] = useState(INITIAL_WORLD_HEALTH)
+  const [scoreState, setScoreState] = useState(INITIAL_SECURITY_SCORE_STATE)
 
   function applyHealthDelta(delta) {
     setWorldHealth((current) => clampWorldHealth(current + delta))
+  }
+
+  function applyScoreUpdate(correct) {
+    setScoreState((current) => applyResponseToScore(current, correct))
   }
 
   useEffect(() => {
@@ -70,12 +79,25 @@ export default function CyberDistrict({ onExit }) {
         <h1 id="cyber-district-title" className="cyber-district__title">
           Security Command
         </h1>
-        <div className="cyber-district__health" role="status" aria-label={`World health ${worldHealth}`}>
-          <span className="cyber-district__health-label">World Health</span>
-          <div className="cyber-district__health-bar">
-            <div className="cyber-district__health-fill" style={{ width: `${worldHealth}%` }} />
+        <div className="cyber-district__stats">
+          <div className="cyber-district__health" role="status" aria-label={`World health ${worldHealth}`}>
+            <span className="cyber-district__health-label">World Health</span>
+            <div className="cyber-district__health-bar">
+              <div className="cyber-district__health-fill" style={{ width: `${worldHealth}%` }} />
+            </div>
+            <span className="cyber-district__health-value">{worldHealth}</span>
           </div>
-          <span className="cyber-district__health-value">{worldHealth}</span>
+          <div
+            className="cyber-district__score"
+            role="status"
+            aria-label={`Security score ${scoreState.score}${scoreState.streak > 1 ? `, ${scoreState.streak} correct in a row` : ''}`}
+          >
+            <span className="cyber-district__score-label">Security Score</span>
+            <span className="cyber-district__score-value">{scoreState.score}</span>
+            {scoreState.streak > 1 && (
+              <span className="cyber-district__score-streak">{scoreState.streak}x streak</span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -100,7 +122,11 @@ export default function CyberDistrict({ onExit }) {
           <h2 id="incident-response-heading" className="cyber-district__panel-heading">
             Incident Response
           </h2>
-          <ThreatPanel worldHealth={worldHealth} onHealthChange={applyHealthDelta} />
+          <ThreatPanel
+            worldHealth={worldHealth}
+            onHealthChange={applyHealthDelta}
+            onScoreChange={applyScoreUpdate}
+          />
         </article>
 
         <article className="cyber-district__panel" aria-labelledby="defense-status-heading">
