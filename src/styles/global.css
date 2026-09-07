@@ -95,3 +95,26 @@ code, kbd, samp, pre {
   white-space: nowrap;
   border: 0;
 }
+
+/* Temporary placeholder shown after ENTER, until the world map exists. */
+.app-placeholder {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  gap: var(--space-4);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.app-placeholder button {
+  justify-self: center;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--accent-primary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}

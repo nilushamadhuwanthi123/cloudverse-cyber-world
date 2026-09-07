@@ -1,0 +1,135 @@
+/*
+ * Intro screen.
+ *
+ * Every colour, space and duration below comes from tokens.css. Nothing
+ * here invents a value -- that is the rule that keeps the districts
+ * looking like one product once two people are building them.
+ */
+
+.intro {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-5);
+  overflow: hidden;
+}
+
+/* A single soft pool of light behind the logo. One gradient, not five --
+   spec 34 warns against excessive glow, and depth reads better when it
+   comes from one clear source. */
+.intro__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 50% 40% at 50% 42%,
+    rgba(0, 229, 255, 0.10),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.intro__content {
+  position: relative;
+  text-align: center;
+  max-width: 34rem;
+}
+
+.intro__logo {
+  margin: 0;
+  font-size: clamp(2.25rem, 11vw, var(--text-3xl));
+  font-weight: 600;
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-primary);
+  /* Starting state for the anime.js timeline. If JavaScript fails the
+     text is still here and readable -- it just never fades in. */
+  opacity: 0;
+}
+
+.intro__tagline {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  opacity: 0;
+}
+
+.intro__boot {
+  list-style: none;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+  text-align: left;
+  /* Keeps the block centred while its text stays left-aligned, so the
+     lines read like a terminal instead of a poem. */
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.intro__line {
+  opacity: 0;
+}
+
+.intro__line-marker {
+  color: var(--accent-primary);
+  margin-right: var(--space-2);
+}
+
+.intro__enter {
+  margin-top: var(--space-6);
+  min-width: 11rem;
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wider);
+  color: var(--accent-primary);
+  background: transparent;
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+.intro__enter:hover:not(:disabled),
+.intro__enter:focus-visible:not(:disabled) {
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+  box-shadow: var(--glow-cyan);
+}
+
+/* Disabled only while the sequence is still playing. Pointer-events stay
+   on so a click still reaches the skip handler on the section. */
+.intro__enter:disabled {
+  cursor: default;
+  opacity: 0;
+}
+
+.intro__skip-hint {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* Touch targets need room. Spec 37: mobile is a real layout, not a
+   shrunken desktop one. */
+@media (max-width: 480px) {
+  .intro__enter {
+    width: 100%;
+    padding-block: var(--space-4);
+  }
+
+  .intro__boot {
+    font-size: 0.6875rem;
+  }
+}
