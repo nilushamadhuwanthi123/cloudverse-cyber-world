@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { stagger } from 'animejs'
+import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
 import {
   motionTimeline,
   prefersReducedMotion,
@@ -7,6 +8,7 @@ import {
   stopMotion,
 } from '../../lib/motion'
 import SeverityBadge from './components/SeverityBadge'
+import ThreatPanel from './components/ThreatPanel'
 import './CyberDistrict.css'
 
 const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical']
@@ -16,16 +18,24 @@ const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical']
  *
  * This is the UI layer only -- spec's layered architecture (UI ->
  * Components -> Game Logic -> Services -> Storage) means the panels
- * below are placeholders a later phase fills with real threat data.
- * Building the shell first means Security System and Incident Response
- * have a home to plug into instead of inventing layout at the same time
- * as logic.
+ * below are placeholders a later phase fills with real threat data,
+ * except Incident Response, which now runs on the threat engine in
+ * game/threatEngine.js (design: Kavindu).
+ *
+ * World health lives here rather than inside ThreatPanel because the
+ * header needs to show it too -- it is district-level state, not
+ * panel-level state.
  */
 export default function CyberDistrict({ onExit }) {
   const rootRef = useRef(null)
   const timelineRef = useRef(null)
   const [ready, setReady] = useState(prefersReducedMotion)
   const [activeSeverity, setActiveSeverity] = useState('low')
+  const [worldHealth, setWorldHealth] = useState(INITIAL_WORLD_HEALTH)
+
+  function applyHealthDelta(delta) {
+    setWorldHealth((current) => clampWorldHealth(current + delta))
+  }
 
   useEffect(() => {
     const root = rootRef.current
@@ -56,9 +66,18 @@ export default function CyberDistrict({ onExit }) {
   return (
     <section ref={rootRef} className="cyber-district" aria-labelledby="cyber-district-title">
       <p className="cyber-district__eyebrow">CYBER DISTRICT</p>
-      <h1 id="cyber-district-title" className="cyber-district__title">
-        Security Command
-      </h1>
+      <div className="cyber-district__title-row">
+        <h1 id="cyber-district-title" className="cyber-district__title">
+          Security Command
+        </h1>
+        <div className="cyber-district__health" role="status" aria-label={`World health ${worldHealth}`}>
+          <span className="cyber-district__health-label">World Health</span>
+          <div className="cyber-district__health-bar">
+            <div className="cyber-district__health-fill" style={{ width: `${worldHealth}%` }} />
+          </div>
+          <span className="cyber-district__health-value">{worldHealth}</span>
+        </div>
+      </div>
 
       <div className="cyber-district__grid">
         <article className="cyber-district__panel" aria-labelledby="threat-severity-heading">
@@ -81,10 +100,7 @@ export default function CyberDistrict({ onExit }) {
           <h2 id="incident-response-heading" className="cyber-district__panel-heading">
             Incident Response
           </h2>
-          <p className="cyber-district__panel-note">
-            No active incidents. The response engine plugs in here in a
-            later phase.
-          </p>
+          <ThreatPanel worldHealth={worldHealth} onHealthChange={applyHealthDelta} />
         </article>
 
         <article className="cyber-district__panel" aria-labelledby="defense-status-heading">
