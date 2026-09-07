@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import IntroScreen from './features/intro/IntroScreen'
+import CloudDistrict from './features/cloud/CloudDistrict'
 
 /**
  * Application shell.
@@ -16,13 +17,6 @@ export default function App() {
     return <IntroScreen onEnter={() => setEntered(true)} />
   }
 
-  // Placeholder until Phase 4 builds the world map.
-  return (
-    <main className="app-placeholder">
-      <p>World map arrives in Phase 4.</p>
-      <button type="button" onClick={() => setEntered(false)}>
-        Back to intro
-      </button>
-    </main>
-  )
+  return <CloudDistrict onBackToIntro={() => setEntered(false)} />
 }
+
