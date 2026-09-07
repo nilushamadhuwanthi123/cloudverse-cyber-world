@@ -10,6 +10,25 @@ than a dashboard you read.
 > Cyber and Cloud — with the shared game layer, persistence and test
 > suite behind them. The world map, DevOps district and Core are next.
 
+![Cyber District — Security Command](docs/screenshots/cyber-district.png)
+
+## The loop
+
+CLOUDVERSE is a simulation, not a dashboard, and the difference is that
+nothing here is only a readout — every panel is somewhere a decision gets
+made and paid for:
+
+```
+explore → something happens → you respond → the world changes
+    ↑                                              │
+    └──────────  progress unlocks more  ←──────────┘
+```
+
+A threat appears because the district is in the state it is in. You
+answer it, right or wrong, and world health, security score and risk all
+move. Missions unlock from what you actually did, and the whole thing
+survives a refresh — so the run is yours, not a demo that resets.
+
 ## Concept
 
 Three districts surround a central Core:
@@ -47,6 +66,8 @@ unlocks in order and survives a page refresh.
 **Cloud District** — compute, storage and database locations rendered as
 an explorable environment.
 
+![Cloud District](docs/screenshots/cloud-district.png)
+
 **The layer underneath both** — `game/` holds the rules (threat
 lifecycle, severity, security score with a streak bonus, mission unlock
 order, and a risk reading derived from current exposure rather than
@@ -61,6 +82,48 @@ violations on both districts, verified in a real browser rather than by
 eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured
 and why the coverage line sits where it does.
+
+## Decisions worth explaining
+
+A few choices here were deliberate, and the reasoning is the interesting
+part:
+
+**Risk is derived, not accumulated.** World health and security score are
+records of what already happened. Risk is a reading of the district's
+condition *right now*, so it is recomputed from current state rather than
+added up. Switching a defense back on drops risk immediately — a running
+total could never do that, and the difference is what makes risk feel
+like a gauge instead of another score.
+
+**Threat generation reads system state.** A purely random threat feed
+would make the district a slot machine. Instead, low world health both
+raises the chance of a threat and skews *which* threat: a district under
+strain sees proportionally more of its severe types, so the simulation
+reacts to its own condition.
+
+**A wrong answer still teaches.** Every defense action carries an
+explanation, correct or not, because the point is to learn why a response
+fits — not to be scored and moved along.
+
+**Rules live outside React.** `game/` holds no JSX, no DOM and no
+`localStorage`, which is why 77 tests can cover the interesting behaviour
+as plain function-in, value-out. The failures worth catching in a project
+like this are rule failures — a mission unlocking out of order, a streak
+bonus that keeps paying after a mistake — and those are cheapest to test
+when the rules do not need a browser.
+
+**The services seam is not decoration.** Every read and write goes
+through `services/`, whose functions are async even though nothing they
+do needs to be yet. The day they become `fetch()` calls, their signatures
+do not change and no component is rewritten. That single restriction —
+components never import `data/` or `storage/` directly — is what makes
+the "API-ready" claim in this file checkable rather than a slogan.
+
+**Storage failure is a normal case.** A browser in privacy mode throws on
+`localStorage` access itself, not just on write. So the adapter treats
+unavailable storage, exhausted quota and JSON an older build wrote as
+ordinary paths that degrade to a fresh, fully playable session — and
+`reset` clears only the keys this app owns, never the whole origin.
 
 ## Tech stack
 
@@ -93,23 +156,28 @@ reasoning, including where state lives and why.
 
 ```
 src/
-├── app/          application shell, providers, layout
-├── components/   shared presentational components (ui/ = primitives)
-├── features/     one folder per district
-│   ├── cyber/    threat monitor, firewall, incident response
-│   ├── cloud/    compute, storage, database
-│   ├── devops/   CI/CD pipeline
-│   └── core/     central Core — reads from all districts
-├── game/         game rules: health, score, risk, missions, unlocks
-├── data/         mock content (threats, missions, districts)
-├── services/     the seam — swap for a REST API without touching the UI
-├── storage/      localStorage adapter
-├── styles/       design tokens and global styles
-└── lib/          generic helpers (animation, formatting)
+├── features/
+│   ├── cyber/      threat panel, defense status, missions, severity badges
+│   ├── cloud/      compute, storage and database locations
+│   └── intro/      the entry sequence
+├── game/           the rules — framework-free, no JSX or DOM
+│   ├── threatEngine.js      lifecycle, generation, response resolution
+│   ├── threatTypes.js       threat catalogue and severity
+│   ├── defenseRules.js      firewall rule catalogue
+│   ├── securityScore.js     scoring and streak bonus
+│   ├── riskScore.js         current exposure, derived
+│   └── missionState.js      unlock order and completion
+├── data/           content: mission definitions
+├── services/       the async seam over storage
+├── storage/        localStorage adapter
+├── styles/         design tokens and global styles
+└── lib/            motion helper over anime.js
 ```
 
-Every folder carries a short `README.md` explaining what belongs in it —
-useful when two people are adding files to the same tree.
+`app/` and `components/` exist as placeholders with a README each; the
+DevOps district and the Core are not built yet. Every folder carries a
+short `README.md` explaining what belongs in it — useful when two people
+are adding files to the same tree.
 
 ## Running locally
 
@@ -133,15 +201,23 @@ npm run dev
 
 Built by two developers working in parallel:
 
-| Developer | Area | Branches |
-|---|---|---|
-| **Nilusha Madhuwanthi** | Cybersecurity district, full-stack architecture | `feat/cyber-security-system`, `feat/incident-response-engine`, `feat/security-dashboard-and-ux`, `feat/cyber-game-integration` |
-| Teammate | Cloud district, DevOps district, world map | `feat/cloud-district`, `feat/devops-pipeline`, `feat/world-map` |
+| Developer | Area |
+|---|---|
+| **Nilusha Madhuwanthi** | Cybersecurity district, and the shared `game/` · `services/` · `storage/` · `data/` layers underneath both districts |
+| **Kavindu Maduhansa** | Cloud district, DevOps district, world map |
 
-Work happens on feature branches and merges through pull requests that
-the other developer reviews. Districts live in separate folders so the
-two streams of work rarely touch the same files; where they do meet —
-`game/`, `core/`, `styles/`, `components/ui/` — a real review matters.
+Work happens on feature branches and merges through pull requests the
+other developer reviews. Districts live in separate folders so the two
+streams rarely touch the same files; where they do meet — `game/`,
+`styles/`, the app shell — a real review matters.
+
+The reviews are real ones. The Cloud district PR was sent back with four
+findings before it merged: a duplicate `<main>` landmark that broke the
+skip link, two labels at 3.96:1 against a 4.5:1 minimum, a CSS header
+comment that claimed something the file did not do, and — the one that
+mattered — a merge resolution that had quietly dropped the district's
+route, so the feature was on the branch but unreachable in the app. Each
+was verified fixed in a browser before approval.
 
 ## Roadmap
 
