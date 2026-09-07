@@ -93,6 +93,8 @@ npm run dev
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build locally |
 | `npm run lint` | Lint the source |
+| `npm test` | Run the test suite once |
+| `npm run test:watch` | Run the tests in watch mode |
 
 ## Collaboration
 

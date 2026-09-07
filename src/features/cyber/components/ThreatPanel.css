@@ -1,0 +1,122 @@
+/*
+ * Threat panel -- tokens.css only, same rule as every other district
+ * file.
+ */
+
+.threat-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.threat-panel__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.threat-panel__stage {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.threat-panel__title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.threat-panel__summary {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* text-secondary rather than text-muted: at 12px this is body copy a
+   player is expected to read, and muted lands under the 4.5:1 contrast
+   minimum against the panel background. */
+.threat-panel__waiting {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-wide);
+}
+
+.threat-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.threat-panel__action {
+  text-align: left;
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.threat-panel__action:hover {
+  border-color: var(--district-cyber-primary);
+  background: color-mix(in srgb, var(--district-cyber-primary) 8%, var(--surface-2));
+}
+
+.threat-panel__outcome {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.threat-panel__outcome--correct {
+  border-color: color-mix(in srgb, var(--status-stable) 45%, var(--border-subtle));
+  background: color-mix(in srgb, var(--status-stable) 8%, transparent);
+}
+
+.threat-panel__outcome--wrong {
+  border-color: color-mix(in srgb, var(--status-critical) 45%, var(--border-subtle));
+  background: color-mix(in srgb, var(--status-critical) 8%, transparent);
+}
+
+.threat-panel__outcome-verdict {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.threat-panel__outcome-explanation {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.threat-panel__next {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.threat-panel__next:hover {
+  border-color: var(--district-cyber-primary);
+}
