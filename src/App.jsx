@@ -2,14 +2,15 @@ import { useState } from 'react'
 import IntroScreen from './features/intro/IntroScreen'
 import CyberDistrict from './features/cyber/CyberDistrict'
 import CloudDistrict from './features/cloud/CloudDistrict'
+import DevOpsPipeline from './features/devops/DevOpsPipeline'
 import './App.css'
 
 /**
  * Application shell with District Switcher.
  *
- * Allows exploration of both Cloud District (District 01) and
- * Cyber District (District 02) until the full Phase 4 World Map
- * is implemented.
+ * Allows exploration of Cloud District (District 01),
+ * DevOps District (District 02), and Cyber District (District 03)
+ * until the full Phase 4 World Map is implemented.
  */
 export default function App() {
   const [entered, setEntered] = useState(false)
@@ -45,6 +46,17 @@ export default function App() {
             <button
               type="button"
               role="tab"
+              id="tab-devops"
+              aria-selected={district === 'devops'}
+              aria-controls="main-content"
+              className={`district-nav__tab ${district === 'devops' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setDistrict('devops')}
+            >
+              ⚡ DevOps District
+            </button>
+            <button
+              type="button"
+              role="tab"
               id="tab-cyber"
               aria-selected={district === 'cyber'}
               aria-controls="main-content"
@@ -70,6 +82,8 @@ export default function App() {
           <IntroScreen onEnter={() => setEntered(true)} />
         ) : district === 'cloud' ? (
           <CloudDistrict onBackToIntro={() => setEntered(false)} />
+        ) : district === 'devops' ? (
+          <DevOpsPipeline onBackToIntro={() => setEntered(false)} />
         ) : (
           <CyberDistrict onExit={() => setEntered(false)} />
         )}
