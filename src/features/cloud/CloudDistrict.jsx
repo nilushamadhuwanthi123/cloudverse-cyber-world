@@ -1056,7 +1056,7 @@ export default function CloudDistrict({ onBackToIntro, onBackToMap, onNavigateTo
       )}
 
       {/* Main World Canvas */}
-      <main className="cloud-district__canvas">
+      <section className="cloud-district__canvas">
         {/* District Title Header */}
         <header className="cloud-district__header">
           <span className="cloud-district__tag">Digital Territory</span>
@@ -1612,7 +1612,7 @@ export default function CloudDistrict({ onBackToIntro, onBackToMap, onNavigateTo
             </footer>
           </section>
         )}
-      </main>
+      </section>
     </div>
   )
 }

@@ -139,8 +139,8 @@ function DistrictGlyph({ id }) {
  */
 export default function WorldMap({
   onSelectDistrict,
-  onExitToIntro,
   initialDistrictId = 'core',
+  onExitToIntro,
 }) {
   const [selectedId, setSelectedId] = useState(initialDistrictId)
   const [worldHealth, setWorldHealth] = useState(INITIAL_WORLD_HEALTH)
@@ -370,7 +370,7 @@ export default function WorldMap({
             <span className={`world-map__hud-dot world-map__hud-dot--${systemLevel}`} />
           </div>
           <div>
-            <div className="world-map__hud-title">CLOUDVERSE // SECTOR MAP</div>
+            <h1 className="world-map__hud-title">CLOUDVERSE // SECTOR MAP</h1>
             <div className="world-map__hud-subtitle">DIGITAL WORLD INTERCONNECT</div>
           </div>
         </div>
@@ -446,7 +446,7 @@ export default function WorldMap({
       </header>
 
       {/* Main Spatial Map Area */}
-      <main className="world-map__workspace">
+      <section className="world-map__workspace">
         <div className="world-map__canvas-wrapper">
           {/* Scalable SVG Energy Conduits Connecting the World */}
           <svg
@@ -586,6 +586,10 @@ export default function WorldMap({
           className="world-map__inspector"
           role="region"
           aria-labelledby="district-inspector-title"
+          /* The panel scrolls when a district's briefing runs long. A
+             scrollable region that cannot take focus is unreachable by
+             keyboard -- there is no way to scroll it without a mouse. */
+          tabIndex={0}
         >
           <div className="world-map__inspector-content">
             {/* Header / Sector Tag */}
@@ -701,7 +705,7 @@ export default function WorldMap({
             </div>
           </div>
         </aside>
-      </main>
+      </section>
 
       {/* Bottom Status Ticker */}
       <footer className="world-map__ticker" aria-label="System Environmental Broadcast">
