@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { stagger } from 'animejs'
 import { CLOUD_LOCATIONS } from './cloudLocations'
+import {
+  CLOUD_INCIDENTS,
+  INCIDENT_LIFECYCLE,
+  findIncident,
+  isCorrectIncidentAction,
+} from './cloudIncidents'
+import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
+import { loadProgress, saveProgress } from '../../services/progressService'
 import { motionTimeline, settleIfReduced, stopMotion } from '../../lib/motion'
 import './CloudDistrict.css'
 
@@ -68,12 +76,12 @@ function LocationGlyph({ type }) {
 }
 
 /**
- * Initial operation simulation states for the three sectors.
+ * Initial operation simulation states for the three sectors (Step 3).
  * Kept purely local to the feature (no localStorage, no global state).
  */
 const INITIAL_OPERATIONS = {
   compute: {
-    scaleStep: 0, // 0 = 4 instances (base), 1 = 6 instances (scaled), 2 = 8 instances (max)
+    scaleStep: 0, // 0 = 4 instances, 1 = 6 instances, 2 = 8 instances (max)
     status: 'idle', // 'idle' | 'processing' | 'completed'
     message: null,
   },
@@ -90,26 +98,73 @@ const INITIAL_OPERATIONS = {
 }
 
 /**
- * Cloud District: Step 3 Interactive Fictional Cloud-Operation Simulations.
+ * Cloud District: Complete End-to-End Experience.
  *
- * Preserves Step 1 visual environment, navigation, node interactions,
- * and Step 2 technical telemetry HUD, while adding interactive cloud operations:
- * - Compute Island: "Scale Up" (4 -> 6 instances, reduced CPU & load, Scaling State: SCALING COMPLETE)
- * - Storage Valley: "Optimize Storage" (7.4 TB -> 6.8 TB used, 4.6 TB -> 5.2 TB avail, deduplicated)
- * - Database Lake: "Optimize Database" (2,480 -> 3,100 queries/min, 128 -> 105 conns, OPTIMIZED)
+ * Implements:
+ * - Step 1: Visual environment, topology conduits, selectable locations, keyboard accessibility.
+ * - Step 2: Technical inspection HUD, deep telemetry metrics, hardware fabric, and capabilities.
+ * - Step 3: Interactive fictional operations (Scale Up, Optimize Storage, Optimize Database).
+ * - Phase 2 (Incidents & World Health): Deterministic cloud incident lifecycle (High Traffic,
+ *   Server Failure, Storage Capacity Exhaustion) with World Health integration (+5 / -10).
  */
 export default function CloudDistrict({ onBackToIntro }) {
   const [selectedId, setSelectedId] = useState(null)
   const [operations, setOperations] = useState(INITIAL_OPERATIONS)
+  const [worldHealth, setWorldHealth] = useState(INITIAL_WORLD_HEALTH)
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false)
+  const progressRef = useRef(null)
+
+  // Incident state
+  const [incidentState, setIncidentState] = useState({
+    incident: null,
+    lifecycle: INCIDENT_LIFECYCLE.IDLE,
+    rewarded: false,
+    penalized: false,
+    message: null,
+    isProcessing: false,
+  })
 
   const rootRef = useRef(null)
   const timelineRef = useRef(null)
   const detailPanelRef = useRef(null)
   const detailTimelineRef = useRef(null)
   const actionTimelineRef = useRef(null)
+  const incidentBannerRef = useRef(null)
   const processingTimerRef = useRef(null)
 
   const selectedLocation = CLOUD_LOCATIONS.find((loc) => loc.id === selectedId) || null
+
+  // Load World Health and saved progress on mount using the single source of truth (services/progressService)
+  useEffect(() => {
+    let cancelled = false
+    loadProgress().then((saved) => {
+      if (cancelled) return
+      progressRef.current = saved
+      if (typeof saved.worldHealth === 'number') {
+        setWorldHealth(clampWorldHealth(saved.worldHealth))
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Safely update and persist World Health through services/progressService
+  const applyWorldHealthDelta = useCallback(
+    (delta) => {
+      setWorldHealth((current) => {
+        const next = clampWorldHealth(current + delta)
+        const updated = {
+          ...progressRef.current,
+          worldHealth: next,
+        }
+        progressRef.current = updated
+        saveProgress(updated)
+        return next
+      })
+    },
+    []
+  )
 
   const handleSelect = (id) => {
     setSelectedId((prev) => (prev === id ? null : id))
@@ -119,16 +174,20 @@ export default function CloudDistrict({ onBackToIntro }) {
     setSelectedId(null)
   }, [])
 
-  // Keyboard shortcut: Escape to close inspection panel
+  // Keyboard shortcut: Escape to close inspection panel or incident simulator
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && selectedId) {
-        handleCloseDetail()
+      if (e.key === 'Escape') {
+        if (isSimulatorOpen) {
+          setIsSimulatorOpen(false)
+        } else if (selectedId) {
+          handleCloseDetail()
+        }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedId, handleCloseDetail])
+  }, [selectedId, isSimulatorOpen, handleCloseDetail])
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -201,7 +260,7 @@ export default function CloudDistrict({ onBackToIntro }) {
       duration: 320,
     })
       .add(
-        panel.querySelectorAll('.cloud-detail__action-console'),
+        panel.querySelectorAll('.cloud-detail__incident-banner, .cloud-detail__action-console'),
         {
           opacity: [0, 1],
           y: [8, 0],
@@ -236,21 +295,163 @@ export default function CloudDistrict({ onBackToIntro }) {
     return () => stopMotion(detailTimelineRef.current)
   }, [selectedId])
 
+  // Trigger an incident deterministically
+  const handleTriggerIncident = (incidentId) => {
+    const inc = findIncident(incidentId)
+    if (!inc) return
+
+    setIsSimulatorOpen(false)
+
+    // Stop any pending timers
+    if (processingTimerRef.current) clearTimeout(processingTimerRef.current)
+
+    setIncidentState({
+      incident: inc,
+      lifecycle: INCIDENT_LIFECYCLE.DETECTED,
+      rewarded: false,
+      penalized: false,
+      message: `ANOMALY DETECTED: ${inc.title} // AFFECTING ${inc.targetLocationId.toUpperCase()}`,
+      isProcessing: false,
+    })
+
+    // Advance smoothly from DETECTED to ACTIVE
+    setTimeout(() => {
+      setIncidentState((prev) => {
+        if (prev.lifecycle === INCIDENT_LIFECYCLE.DETECTED) {
+          return {
+            ...prev,
+            lifecycle: INCIDENT_LIFECYCLE.ACTIVE,
+            message: `SYSTEM ALERT: ${inc.title} IS ACTIVE. RESPONSE REQUIRED.`,
+          }
+        }
+        return prev
+      })
+    }, 850)
+
+    // Automatically focus/select target location if not already selected
+    setSelectedId(inc.targetLocationId)
+  }
+
+  // Handle player response to an active incident
+  const handleIncidentResponse = (actionId) => {
+    const { incident, lifecycle, isProcessing, rewarded, penalized } = incidentState
+    if (!incident || lifecycle !== INCIDENT_LIFECYCLE.ACTIVE || isProcessing) return
+
+    const isCorrect = isCorrectIncidentAction(incident, actionId)
+
+    setIncidentState((prev) => ({
+      ...prev,
+      isProcessing: true,
+      message: isCorrect
+        ? 'EXECUTING RESPONSE PROTOCOL & MITIGATING ANOMALY...'
+        : 'EXECUTING OVERRIDE INSTRUCTION...',
+    }))
+
+    processingTimerRef.current = setTimeout(() => {
+      if (isCorrect) {
+        // Successful resolution
+        if (!rewarded) {
+          applyWorldHealthDelta(incident.reward) // +5 World Health
+        }
+
+        setIncidentState((prev) => ({
+          ...prev,
+          lifecycle: INCIDENT_LIFECYCLE.RESOLVED,
+          isProcessing: false,
+          rewarded: true,
+          message: `INCIDENT RESOLVED // ${incident.title} MITIGATED · WORLD HEALTH +${incident.reward}`,
+        }))
+
+        // Trigger green celebration pulse animation on panel
+        const panel = detailPanelRef.current
+        if (panel) {
+          const cards = panel.querySelectorAll('.cloud-detail__metric-card')
+          stopMotion(actionTimelineRef.current)
+          const tl = motionTimeline({ defaults: { ease: 'out(3)' } })
+          tl.add(cards, {
+            opacity: [0.6, 1],
+            y: [-4, 0],
+            duration: 400,
+            delay: stagger(35),
+          })
+          settleIfReduced(tl)
+          actionTimelineRef.current = tl
+        }
+      } else {
+        // Escalation / failure
+        if (!penalized) {
+          applyWorldHealthDelta(incident.penalty) // -10 World Health
+        }
+
+        setIncidentState((prev) => ({
+          ...prev,
+          lifecycle: INCIDENT_LIFECYCLE.ESCALATED,
+          isProcessing: false,
+          penalized: true,
+          message: `INCIDENT ESCALATED // UNHANDLED SYSTEM FAULT · WORLD HEALTH ${incident.penalty}`,
+        }))
+      }
+    }, 950)
+  }
+
+  // Dismiss resolved/escalated incident and return sector to nominal
+  const handleDismissIncident = () => {
+    setIncidentState({
+      incident: null,
+      lifecycle: INCIDENT_LIFECYCLE.IDLE,
+      rewarded: false,
+      penalized: false,
+      message: null,
+      isProcessing: false,
+    })
+  }
+
   /**
-   * Derive dynamic telemetry metrics according to the current operation state.
+   * Derive dynamic telemetry metrics according to the current operation and incident state.
    */
   const getDynamicLocationData = (loc) => {
     if (!loc) return null
 
+    // Check if an active/resolved incident affects this location
+    const { incident, lifecycle } = incidentState
+    const isTargetOfIncident = incident && incident.targetLocationId === loc.id
+
+    if (isTargetOfIncident) {
+      if (lifecycle === INCIDENT_LIFECYCLE.DETECTED || lifecycle === INCIDENT_LIFECYCLE.ACTIVE) {
+        return {
+          ...loc,
+          status:
+            incident.severity === 'critical'
+              ? 'CRITICAL // INCIDENT ACTIVE'
+              : 'WARNING // STRAINED',
+          metrics: incident.activeMetrics,
+        }
+      }
+
+      if (lifecycle === INCIDENT_LIFECYCLE.RESOLVED) {
+        return {
+          ...loc,
+          status: 'RESOLVED // STABLE',
+          metrics: incident.resolvedMetrics,
+        }
+      }
+
+      if (lifecycle === INCIDENT_LIFECYCLE.ESCALATED) {
+        return {
+          ...loc,
+          status: 'ESCALATED // FAULT UNMITIGATED',
+          metrics: incident.activeMetrics,
+        }
+      }
+    }
+
+    // Step 3 standard operational simulations (when not overridden by an active incident)
     if (loc.id === 'compute') {
       const op = operations.compute
       const scaleStep = op.scaleStep
 
       if (scaleStep === 0) {
-        return {
-          ...loc,
-          metrics: loc.baseMetrics,
-        }
+        return { ...loc, metrics: loc.baseMetrics }
       }
 
       if (scaleStep === 1) {
@@ -376,10 +577,7 @@ export default function CloudDistrict({ onBackToIntro }) {
     if (loc.id === 'storage') {
       const op = operations.storage
       if (!op.optimized) {
-        return {
-          ...loc,
-          metrics: loc.baseMetrics,
-        }
+        return { ...loc, metrics: loc.baseMetrics }
       }
 
       return {
@@ -453,10 +651,7 @@ export default function CloudDistrict({ onBackToIntro }) {
     if (loc.id === 'database') {
       const op = operations.database
       if (!op.optimized) {
-        return {
-          ...loc,
-          metrics: loc.baseMetrics,
-        }
+        return { ...loc, metrics: loc.baseMetrics }
       }
 
       return {
@@ -524,7 +719,7 @@ export default function CloudDistrict({ onBackToIntro }) {
   const activeLocation = getDynamicLocationData(selectedLocation)
 
   /**
-   * Trigger the operational simulation for the currently active sector.
+   * Step 3: Trigger the operational simulation when no incident is active.
    */
   const handleTriggerOperation = (locationId) => {
     const currentOp = operations[locationId]
@@ -658,7 +853,6 @@ export default function CloudDistrict({ onBackToIntro }) {
       },
     }))
 
-    // Clear reset notice after a brief moment
     setTimeout(() => {
       setOperations((prev) => ({
         ...prev,
@@ -670,25 +864,117 @@ export default function CloudDistrict({ onBackToIntro }) {
     }, 2000)
   }
 
+  // Active incident details if affecting selected sector
+  const activeIncident = incidentState.incident
+  const isSelectedIncidentTarget =
+    activeIncident && activeIncident.targetLocationId === selectedId
+  const isIncidentActiveOrDetected =
+    incidentState.lifecycle === INCIDENT_LIFECYCLE.DETECTED ||
+    incidentState.lifecycle === INCIDENT_LIFECYCLE.ACTIVE
+  const isIncidentResolved = incidentState.lifecycle === INCIDENT_LIFECYCLE.RESOLVED
+  const isIncidentEscalated = incidentState.lifecycle === INCIDENT_LIFECYCLE.ESCALATED
+
   return (
     <div ref={rootRef} className="cloud-district">
       {/* Visual background layers */}
       <div className="cloud-district__grid-bg" aria-hidden="true" />
       <div className="cloud-district__ambient-glow" aria-hidden="true" />
 
-      {/* Top HUD Telemetry Navigation */}
+      {/* Top HUD Telemetry Navigation & World Health */}
       <header className="cloud-district__hud">
         <div className="cloud-district__hud-left">
           <div className="cloud-district__hud-badge">
             <span className="cloud-district__beacon-dot" aria-hidden="true" />
             <span>DISTRICT // 01: CLOUD</span>
           </div>
+
+          {/* Living World Health Integration */}
+          <div
+            className="cloud-district__health-badge"
+            role="status"
+            aria-label={`World Health: ${worldHealth}%`}
+          >
+            <span
+              className={`cloud-district__health-beacon ${
+                worldHealth < 50
+                  ? 'cloud-district__health-beacon--critical'
+                  : worldHealth < 80
+                    ? 'cloud-district__health-beacon--warning'
+                    : ''
+              }`}
+              aria-hidden="true"
+            />
+            <span className="cloud-district__health-label">
+              WORLD HEALTH: <strong>{worldHealth}%</strong>
+            </span>
+            <div className="cloud-district__health-track" aria-hidden="true">
+              <div
+                className={`cloud-district__health-fill ${
+                  worldHealth < 50
+                    ? 'cloud-district__health-fill--critical'
+                    : worldHealth < 80
+                      ? 'cloud-district__health-fill--warning'
+                      : ''
+                }`}
+                style={{ width: `${worldHealth}%` }}
+              />
+            </div>
+          </div>
+
           <span className="cloud-district__hud-status">
             TOPOLOGY: STABLE · REGION: GLOBAL MESH
           </span>
         </div>
 
         <div className="cloud-district__hud-actions">
+          {/* Incident Drill Simulation Trigger */}
+          <div className="cloud-district__simulator-wrapper">
+            <button
+              type="button"
+              id="simulate-incident-btn"
+              className={`cloud-district__simulator-btn ${
+                incidentState.lifecycle !== INCIDENT_LIFECYCLE.IDLE
+                  ? 'cloud-district__simulator-btn--active'
+                  : ''
+              }`}
+              onClick={() => setIsSimulatorOpen((prev) => !prev)}
+              aria-expanded={isSimulatorOpen}
+              aria-controls="cloud-simulator-menu"
+              aria-label="Toggle Incident Simulation Drill Menu"
+            >
+              <span aria-hidden="true">⚠️</span>
+              <span>SIMULATE INCIDENT ▼</span>
+            </button>
+
+            {isSimulatorOpen && (
+              <div
+                id="cloud-simulator-menu"
+                className="cloud-district__simulator-menu"
+                role="menu"
+                aria-label="Select Cloud Incident Simulation"
+              >
+                <div className="cloud-district__simulator-menu-header">
+                  <span>INCIDENT DRILL PROTOCOLS</span>
+                </div>
+                {CLOUD_INCIDENTS.map((inc) => (
+                  <button
+                    key={inc.id}
+                    type="button"
+                    role="menuitem"
+                    className="cloud-district__simulator-menu-item"
+                    onClick={() => handleTriggerIncident(inc.id)}
+                  >
+                    <span className="cloud-district__sim-item-code">{inc.code}</span>
+                    <span className="cloud-district__sim-item-title">{inc.title}</span>
+                    <span className="cloud-district__sim-item-target">
+                      [{inc.targetLocationId.toUpperCase()}]
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {onBackToIntro && (
             <button
               type="button"
@@ -700,6 +986,61 @@ export default function CloudDistrict({ onBackToIntro }) {
           )}
         </div>
       </header>
+
+      {/* Global Incident Notification Broadcast Banner */}
+      {incidentState.lifecycle !== INCIDENT_LIFECYCLE.IDLE && activeIncident && (
+        <aside
+          ref={incidentBannerRef}
+          className={`cloud-incident-alert ${
+            isIncidentResolved
+              ? 'cloud-incident-alert--resolved'
+              : isIncidentEscalated
+                ? 'cloud-incident-alert--escalated'
+                : 'cloud-incident-alert--active'
+          }`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="cloud-incident-alert__content">
+            <span className="cloud-incident-alert__pulse-icon" aria-hidden="true">
+              {isIncidentResolved ? '✓' : isIncidentEscalated ? '✕' : '⚠️'}
+            </span>
+            <div className="cloud-incident-alert__body">
+              <div className="cloud-incident-alert__header-row">
+                <span className="cloud-incident-alert__code">{activeIncident.code}</span>
+                <span className="cloud-incident-alert__title">{activeIncident.title}</span>
+                <span className="cloud-incident-alert__target">
+                  TARGET: SECTOR {activeIncident.targetLocationId.toUpperCase()}
+                </span>
+              </div>
+              <p className="cloud-incident-alert__msg">{incidentState.message}</p>
+            </div>
+          </div>
+
+          <div className="cloud-incident-alert__actions">
+            {selectedId !== activeIncident.targetLocationId && (
+              <button
+                type="button"
+                className="cloud-incident-alert__jump-btn"
+                onClick={() => setSelectedId(activeIncident.targetLocationId)}
+              >
+                JUMP TO SECTOR &rarr;
+              </button>
+            )}
+
+            {(isIncidentResolved || isIncidentEscalated) && (
+              <button
+                type="button"
+                className="cloud-incident-alert__dismiss-btn"
+                onClick={handleDismissIncident}
+                aria-label="Dismiss incident notification"
+              >
+                DISMISS &times;
+              </button>
+            )}
+          </div>
+        </aside>
+      )}
 
       {/* Main World Canvas */}
       <main className="cloud-district__canvas">
@@ -764,19 +1105,26 @@ export default function CloudDistrict({ onBackToIntro }) {
             {CLOUD_LOCATIONS.map((loc) => {
               const isSelected = selectedId === loc.id
               const locOp = operations[loc.id]
-              const isOperated =
-                locOp && (locOp.scaleStep > 0 || locOp.optimized)
+              const isOperated = locOp && (locOp.scaleStep > 0 || locOp.optimized)
+              const hasIncident =
+                activeIncident &&
+                activeIncident.targetLocationId === loc.id &&
+                isIncidentActiveOrDetected
 
               return (
                 <button
                   key={loc.id}
                   type="button"
                   id={`location-node-${loc.id}`}
-                  className={`cloud-node ${isSelected ? 'cloud-node--selected' : ''}`}
+                  className={`cloud-node ${isSelected ? 'cloud-node--selected' : ''} ${
+                    hasIncident ? 'cloud-node--incident' : ''
+                  }`}
                   onClick={() => handleSelect(loc.id)}
                   aria-expanded={isSelected}
                   aria-controls={isSelected ? 'cloud-detail-panel' : undefined}
-                  aria-label={`${loc.title} - ${loc.subtitle}. Click to inspect sector.`}
+                  aria-label={`${loc.title} - ${loc.subtitle}. ${
+                    hasIncident ? 'Incident detected!' : ''
+                  } Click to inspect sector.`}
                 >
                   <div className="cloud-node__top">
                     <div className="cloud-node__glyph-wrapper">
@@ -791,13 +1139,20 @@ export default function CloudDistrict({ onBackToIntro }) {
 
                   <div className="cloud-node__footer">
                     <div className="cloud-node__indicator">
-                      <span className="cloud-node__pulse" aria-hidden="true" />
+                      <span
+                        className={`cloud-node__pulse ${
+                          hasIncident ? 'cloud-node__pulse--danger' : ''
+                        }`}
+                        aria-hidden="true"
+                      />
                       <span>
-                        {isSelected
-                          ? '[ ACTIVE SECTOR ]'
-                          : isOperated
-                            ? '[ MODIFIED // ACTIVE ]'
-                            : '[ STANDBY ]'}
+                        {hasIncident
+                          ? '[ ⚠️ INCIDENT ACTIVE ]'
+                          : isSelected
+                            ? '[ ACTIVE SECTOR ]'
+                            : isOperated
+                              ? '[ MODIFIED // ACTIVE ]'
+                              : '[ STANDBY ]'}
                       </span>
                     </div>
 
@@ -830,8 +1185,21 @@ export default function CloudDistrict({ onBackToIntro }) {
                   <span className="cloud-detail__badge">
                     {activeLocation.badge}
                   </span>
-                  <span className="cloud-detail__status-tag">
-                    <span className="cloud-detail__status-beacon" aria-hidden="true" />
+                  <span
+                    className={`cloud-detail__status-tag ${
+                      isSelectedIncidentTarget && isIncidentActiveOrDetected
+                        ? 'cloud-detail__status-tag--danger'
+                        : ''
+                    }`}
+                  >
+                    <span
+                      className={`cloud-detail__status-beacon ${
+                        isSelectedIncidentTarget && isIncidentActiveOrDetected
+                          ? 'cloud-detail__status-beacon--danger'
+                          : ''
+                      }`}
+                      aria-hidden="true"
+                    />
                     {activeLocation.status}
                   </span>
                 </div>
@@ -852,124 +1220,225 @@ export default function CloudDistrict({ onBackToIntro }) {
               </button>
             </div>
 
-            {/* Step 3: Interactive Fictional Cloud-Operation Console */}
-            {(() => {
-              const op = operations[activeLocation.id]
-              const isProcessing = op.status === 'processing'
-
-              // Determine limits to prevent infinite operations
-              let isMaxed = false
-              let actionBtnText = activeLocation.actionConfig.label
-
-              if (activeLocation.id === 'compute') {
-                if (op.scaleStep === 0) {
-                  actionBtnText = 'SCALE UP (+2 NODES)'
-                } else if (op.scaleStep === 1) {
-                  actionBtnText = 'SCALE UP (+2 TO MAX)'
-                } else {
-                  isMaxed = true
-                  actionBtnText = 'MAX CLUSTER CAPACITY (8/8)'
-                }
-              } else if (activeLocation.id === 'storage') {
-                if (op.optimized) {
-                  isMaxed = true
-                  actionBtnText = 'STORAGE OPTIMIZED'
-                } else {
-                  actionBtnText = 'OPTIMIZE STORAGE'
-                }
-              } else if (activeLocation.id === 'database') {
-                if (op.optimized) {
-                  isMaxed = true
-                  actionBtnText = 'DATABASE OPTIMIZED'
-                } else {
-                  actionBtnText = 'OPTIMIZE DATABASE'
-                }
-              }
-
-              const hasModifications =
-                op.scaleStep > 0 || op.optimized
-
-              return (
-                <div className="cloud-detail__action-console">
-                  <div className="cloud-detail__action-info">
-                    <div className="cloud-detail__action-meta">
-                      <span className="cloud-detail__action-tag">
-                        OPERATIONAL SIMULATION // STEP 3
-                      </span>
-                      {op.message && (
-                        <span
-                          className={`cloud-detail__action-status-msg ${
-                            isProcessing ? 'cloud-detail__action-status-msg--busy' : ''
-                          }`}
-                          role="status"
-                          aria-live="polite"
-                        >
-                          {op.message}
-                        </span>
-                      )}
-                    </div>
-                    <p className="cloud-detail__action-desc">
-                      {activeLocation.actionConfig.description}
-                    </p>
+            {/* PHASE 2: Incident Response Action Console (when an incident is targeting this location) */}
+            {isSelectedIncidentTarget && isIncidentActiveOrDetected && (
+              <div
+                className="cloud-detail__incident-banner"
+                role="region"
+                aria-labelledby="incident-response-title"
+              >
+                <div className="cloud-detail__incident-header">
+                  <div className="cloud-detail__incident-badge">
+                    <span className="cloud-detail__incident-dot" aria-hidden="true" />
+                    <span>ANOMALY PROTOCOL // ACTIVE THREAT</span>
                   </div>
+                  <span className="cloud-detail__incident-impact">
+                    {activeIncident.impactSummary}
+                  </span>
+                </div>
 
-                  <div className="cloud-detail__action-controls">
-                    <button
-                      type="button"
-                      className={`cloud-detail__action-btn ${
-                        isProcessing ? 'cloud-detail__action-btn--processing' : ''
-                      } ${isMaxed ? 'cloud-detail__action-btn--maxed' : ''}`}
-                      onClick={() => handleTriggerOperation(activeLocation.id)}
-                      disabled={isProcessing || isMaxed}
-                      aria-busy={isProcessing}
-                      aria-label={`${actionBtnText} for ${activeLocation.title}`}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <span
-                            className="cloud-detail__spinner"
-                            aria-hidden="true"
-                          />
-                          <span>{activeLocation.actionConfig.activeLabel}</span>
-                        </>
-                      ) : isMaxed ? (
-                        <>
-                          <span
-                            className="cloud-detail__btn-icon"
-                            aria-hidden="true"
-                          >
-                            ✓
-                          </span>
-                          <span>{actionBtnText}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span
-                            className="cloud-detail__btn-icon"
-                            aria-hidden="true"
-                          >
-                            ▶
-                          </span>
-                          <span>{actionBtnText}</span>
-                        </>
-                      )}
-                    </button>
+                <div className="cloud-detail__incident-body">
+                  <h4 id="incident-response-title" className="cloud-detail__incident-title">
+                    {activeIncident.title}
+                  </h4>
+                  <p className="cloud-detail__incident-desc">
+                    {activeIncident.description}
+                  </p>
+                </div>
 
-                    {hasModifications && (
+                <div className="cloud-detail__incident-actions">
+                  {/* Correct Response Action Button */}
+                  <button
+                    type="button"
+                    className="cloud-detail__incident-btn cloud-detail__incident-btn--correct"
+                    onClick={() => handleIncidentResponse(activeIncident.correctActionId)}
+                    disabled={incidentState.isProcessing}
+                    aria-busy={incidentState.isProcessing}
+                    aria-label={`Execute ${activeIncident.correctActionLabel} to resolve ${activeIncident.title}`}
+                  >
+                    {incidentState.isProcessing ? (
+                      <>
+                        <span className="cloud-detail__spinner" aria-hidden="true" />
+                        <span>PROCESSING RESPONSE...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="cloud-detail__btn-icon" aria-hidden="true">
+                          ▶
+                        </span>
+                        <span>{activeIncident.correctActionLabel}</span>
+                        <span className="cloud-detail__reward-tag">[ +5 HEALTH ]</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Incorrect / Escalation Action Button */}
+                  <button
+                    type="button"
+                    className="cloud-detail__incident-btn cloud-detail__incident-btn--escalate"
+                    onClick={() => handleIncidentResponse(activeIncident.incorrectActionId)}
+                    disabled={incidentState.isProcessing}
+                    aria-label={`Execute ${activeIncident.incorrectActionLabel} (Escalates incident)`}
+                  >
+                    <span aria-hidden="true">✕</span>
+                    <span>{activeIncident.incorrectActionLabel}</span>
+                    <span className="cloud-detail__penalty-tag">[ -10 HEALTH ]</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* PHASE 2: Resolution / Escalation Feedback Console */}
+            {isSelectedIncidentTarget && (isIncidentResolved || isIncidentEscalated) && (
+              <div
+                className={`cloud-detail__incident-outcome ${
+                  isIncidentResolved
+                    ? 'cloud-detail__incident-outcome--resolved'
+                    : 'cloud-detail__incident-outcome--escalated'
+                }`}
+                role="status"
+              >
+                <div className="cloud-detail__outcome-icon" aria-hidden="true">
+                  {isIncidentResolved ? '✓' : '✕'}
+                </div>
+                <div className="cloud-detail__outcome-body">
+                  <h4 className="cloud-detail__outcome-title">
+                    {isIncidentResolved
+                      ? 'INCIDENT RESOLUTION CONFIRMED'
+                      : 'INCIDENT ESCALATION LOGGED'}
+                  </h4>
+                  <p className="cloud-detail__outcome-msg">{incidentState.message}</p>
+                </div>
+                <button
+                  type="button"
+                  className="cloud-detail__dismiss-btn"
+                  onClick={handleDismissIncident}
+                >
+                  RESTORE NORMAL HUD &times;
+                </button>
+              </div>
+            )}
+
+            {/* STEP 3: Standard Interactive Cloud-Operation Console (when no active incident targets this sector) */}
+            {(!isSelectedIncidentTarget || (!isIncidentActiveOrDetected && !isIncidentResolved && !isIncidentEscalated)) &&
+              (() => {
+                const op = operations[activeLocation.id]
+                const isProcessing = op.status === 'processing'
+
+                // Determine limits to prevent infinite operations
+                let isMaxed = false
+                let actionBtnText = activeLocation.actionConfig.label
+
+                if (activeLocation.id === 'compute') {
+                  if (op.scaleStep === 0) {
+                    actionBtnText = 'SCALE UP (+2 NODES)'
+                  } else if (op.scaleStep === 1) {
+                    actionBtnText = 'SCALE UP (+2 TO MAX)'
+                  } else {
+                    isMaxed = true
+                    actionBtnText = 'MAX CLUSTER CAPACITY (8/8)'
+                  }
+                } else if (activeLocation.id === 'storage') {
+                  if (op.optimized) {
+                    isMaxed = true
+                    actionBtnText = 'STORAGE OPTIMIZED'
+                  } else {
+                    actionBtnText = 'OPTIMIZE STORAGE'
+                  }
+                } else if (activeLocation.id === 'database') {
+                  if (op.optimized) {
+                    isMaxed = true
+                    actionBtnText = 'DATABASE OPTIMIZED'
+                  } else {
+                    actionBtnText = 'OPTIMIZE DATABASE'
+                  }
+                }
+
+                const hasModifications = op.scaleStep > 0 || op.optimized
+
+                return (
+                  <div className="cloud-detail__action-console">
+                    <div className="cloud-detail__action-info">
+                      <div className="cloud-detail__action-meta">
+                        <span className="cloud-detail__action-tag">
+                          OPERATIONAL SIMULATION // STEP 3
+                        </span>
+                        {op.message && (
+                          <span
+                            className={`cloud-detail__action-status-msg ${
+                              isProcessing
+                                ? 'cloud-detail__action-status-msg--busy'
+                                : ''
+                            }`}
+                            role="status"
+                            aria-live="polite"
+                          >
+                            {op.message}
+                          </span>
+                        )}
+                      </div>
+                      <p className="cloud-detail__action-desc">
+                        {activeLocation.actionConfig.description}
+                      </p>
+                    </div>
+
+                    <div className="cloud-detail__action-controls">
                       <button
                         type="button"
-                        className="cloud-detail__reset-btn"
-                        onClick={() => handleResetOperation(activeLocation.id)}
-                        disabled={isProcessing}
-                        aria-label={`Reset ${activeLocation.title} to baseline nominal telemetry`}
+                        className={`cloud-detail__action-btn ${
+                          isProcessing ? 'cloud-detail__action-btn--processing' : ''
+                        } ${isMaxed ? 'cloud-detail__action-btn--maxed' : ''}`}
+                        onClick={() => handleTriggerOperation(activeLocation.id)}
+                        disabled={isProcessing || isMaxed}
+                        aria-busy={isProcessing}
+                        aria-label={`${actionBtnText} for ${activeLocation.title}`}
                       >
-                        RESET BASELINE ↺
+                        {isProcessing ? (
+                          <>
+                            <span
+                              className="cloud-detail__spinner"
+                              aria-hidden="true"
+                            />
+                            <span>{activeLocation.actionConfig.activeLabel}</span>
+                          </>
+                        ) : isMaxed ? (
+                          <>
+                            <span
+                              className="cloud-detail__btn-icon"
+                              aria-hidden="true"
+                            >
+                              ✓
+                            </span>
+                            <span>{actionBtnText}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span
+                              className="cloud-detail__btn-icon"
+                              aria-hidden="true"
+                            >
+                              ▶
+                            </span>
+                            <span>{actionBtnText}</span>
+                          </>
+                        )}
                       </button>
-                    )}
+
+                      {hasModifications && (
+                        <button
+                          type="button"
+                          className="cloud-detail__reset-btn"
+                          onClick={() => handleResetOperation(activeLocation.id)}
+                          disabled={isProcessing}
+                          aria-label={`Reset ${activeLocation.title} to baseline nominal telemetry`}
+                        >
+                          RESET BASELINE ↺
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )
-            })()}
+                )
+              })()}
 
             {/* Primary Section: Real-Time Telemetry Metrics */}
             <div className="cloud-detail__telemetry-section">
@@ -992,6 +1461,12 @@ export default function CloudDistrict({ onBackToIntro }) {
                     key={metric.label}
                     className={`cloud-detail__metric-card ${
                       metric.isModified ? 'cloud-detail__metric-card--modified' : ''
+                    } ${
+                      metric.statusVariant === 'critical'
+                        ? 'cloud-detail__metric-card--critical'
+                        : metric.statusVariant === 'warning'
+                          ? 'cloud-detail__metric-card--warning'
+                          : ''
                     }`}
                   >
                     <div className="cloud-detail__metric-header">
@@ -1035,9 +1510,11 @@ export default function CloudDistrict({ onBackToIntro }) {
                       >
                         <div
                           className={`cloud-detail__progress-fill ${
-                            metric.statusVariant === 'warning'
-                              ? 'cloud-detail__progress-fill--warning'
-                              : ''
+                            metric.statusVariant === 'critical'
+                              ? 'cloud-detail__progress-fill--critical'
+                              : metric.statusVariant === 'warning'
+                                ? 'cloud-detail__progress-fill--warning'
+                                : ''
                           }`}
                           style={{ width: `${metric.percent}%` }}
                         />
