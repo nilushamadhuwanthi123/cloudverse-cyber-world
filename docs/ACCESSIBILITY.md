@@ -2,9 +2,9 @@
 
 ## How this was checked
 
-Not by eye. The app was audited with axe-core running against the real
-rendered page in Chromium, on both screens, plus a keyboard walk of the
-full tab order and a contrast calculation done against the *effective*
+Not by eye. The app is audited with axe-core running against the real
+rendered page in Chromium, plus a keyboard walk of the full tab order
+and a contrast calculation done against the *effective*
 background — every semi-transparent layer composited down to the page
 behind it, because the panels here are glass surfaces and a naive
 check reads the wrong colour.
@@ -18,7 +18,44 @@ check reads the wrong colour.
 | No way to skip the panels with a keyboard | Skip link as the first element in the tab order, offscreen until focused |
 | `.threat-panel__waiting` at 4.04:1, under the 4.5:1 minimum | Moved from `--text-muted` to `--text-secondary` (now 7.49:1) |
 
-Current state: **zero axe violations** on both screens.
+## Current state, stated precisely
+
+**Method:** axe-core 4.x executed against the rendered page in headless
+Chromium (Playwright), default rule set, `resultTypes: ['violations']`.
+
+**Last run:** 2026-09-08, against the commit that added Security
+Intelligence.
+
+**Surfaces covered — 10:**
+
+| Surface | States audited |
+|---|---|
+| World Map | as loaded |
+| Cloud District | as loaded |
+| DevOps District | as loaded |
+| Cyber · Operations | empty feed, and after a played round |
+| Cyber · Incident Response | open case |
+| Cyber · Security Analytics | with recorded events |
+| Cyber · Digital Forensics | fresh, mid-investigation, at the verdict |
+| Cyber · Network Operations | fresh queue, and after a shift of decisions |
+| Cyber · Security Intelligence | no sightings, and with sightings |
+| Cyber · an unavailable sector | the locked/offline panel |
+
+**Result:** 0 violations on every surface listed, at 1440px and at 400px.
+
+**What that does and does not mean.** An automated scan is a floor, not
+a certificate. axe-core checks what can be checked mechanically —
+landmarks, names, roles, contrast, list semantics. It cannot tell
+whether a label is *meaningful*, whether an interaction makes sense to a
+screen-reader user working through it, or whether the reading order
+matches the visual one in a way that helps. **This project has not been
+tested with real assistive technology or with disabled users, and no
+claim of WCAG conformance is made here.** The unqualified phrase
+"accessible" is deliberately avoided throughout the documentation.
+
+Earlier versions of this file said "zero violations on both screens",
+which was accurate when there were two and quietly stopped being so as
+the district grew. The count above is dated for that reason.
 
 ## What already worked
 
@@ -42,9 +79,13 @@ project rather than luck:
 
 ## Performance
 
-Measured on the production build under 4× CPU throttling and a
-~1.6 Mbps / 150 ms network, which is a deliberately pessimistic profile
-for a mid-range phone.
+*Measured once, by hand, on 2026-09-08 against the production build
+under 4× CPU throttling and a ~1.6 Mbps / 150 ms network — a
+deliberately pessimistic profile for a mid-range phone. These are not
+re-measured on every change and are not tracked in CI, so treat them as
+a dated snapshot rather than a current guarantee. The figures predate
+the Forensics, Network Operations and Security Intelligence sectors and
+the bundle has grown since.*
 
 | Metric | Result |
 |---|---|

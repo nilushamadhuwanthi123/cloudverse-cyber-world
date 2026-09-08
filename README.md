@@ -4,11 +4,35 @@ An interactive, gamified web experience that turns **Cloud Computing**,
 **DevOps** and **Cybersecurity** concepts into a world you explore rather
 than a dashboard you read.
 
-[![CI](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml/badge.svg)](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml)
+### ▶ [Open the live build](https://nilushamadhuwanthi123.github.io/cloudverse-cyber-world/)
 
-> **Status: in development.** All three districts are playable — Cyber,
-> Cloud and DevOps — over a shared game layer, persistence and test
-> suite. The world map and the central Core are what remain.
+[![CI](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml/badge.svg)](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml)
+[![Deploy](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/deploy.yml/badge.svg)](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/deploy.yml)
+
+Both badges are live — they reflect the most recent run, not a
+screenshot of a good day. The site is published from `main` on every
+push.
+
+**Two minutes, if you only have two minutes**
+
+1. **Enter** → you land on the World Map. Pick **🛡 Cyber District**.
+2. A short startup sequence plays (there is a Skip button, and it is
+   skipped entirely under `prefers-reduced-motion`).
+3. **SEC-01 Cyber Operations** — answer a threat. World health moves,
+   and the answer is explained whether you were right or wrong.
+4. That one correct answer unlocks **SEC-02 Incident Response**, which
+   was `LOCKED` a moment ago. The rail says why things are locked, and
+   distinguishes *not earned yet* from *not built yet*.
+5. **SEC-04 Digital Forensics** — trace a connection between two
+   records. It only succeeds if they genuinely share an indicator.
+6. **SEC-03 Security Analytics** — every chart there is derived from
+   what you just did.
+
+> **Status: in development.** The World Map and all three districts are
+> playable over a shared game layer, persistence and test suite. Six of
+> the nine Cyber sectors are built; the rail marks the other three
+> `OFFLINE` rather than pretending they are locked. The central Core is
+> what remains.
 
 ![Cyber District — Security Command](docs/screenshots/cyber-sectors.png)
 
@@ -212,9 +236,12 @@ refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
 **Quality** — 397 tests across the rule, service, storage, navigation,
-forensics, network, intelligence, cursor, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
-accessibility violations on all five screens, verified in a real browser
-rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
+forensics, network, intelligence, cursor, feed and chart layers; lint,
+tests and build run on every pull request; and an axe-core audit in a
+real browser reported zero violations across 10 surfaces on 2026-09-08.
+That is an automated floor, not a conformance claim — the method, the
+exact surfaces and the limits are written down in
+[`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md). See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured
 and why the coverage line sits where it does.
 
@@ -357,8 +384,12 @@ Built by two developers working in parallel:
 
 | Developer | Area |
 |---|---|
-| **Nilusha Madhuwanthi** | Cybersecurity district, and the shared `game/` · `services/` · `storage/` · `data/` layers underneath both districts |
-| **Kavindu Maduhansa** | Cloud district, DevOps district, world map |
+| **Nilusha Madhuwanthi** | The Cyber District and its six built sectors — Cyber Operations, Incident Response, Security Analytics, Digital Forensics, Network Operations, Security Intelligence — plus the shared `game/` · `services/` · `storage/` · `data/` · `lib/` layers underneath all three districts, the security event log everything else reads from, and the cursor and HUD layers |
+| **Kavindu Maduhansa** | Cloud District, DevOps District, World Map, the Cloud↔DevOps bridge, and `game/systemHealth.js` |
+
+Ownership above is checkable: every sector and shared module names its
+author in the pull request that introduced it, and `git log --follow` on
+any file in the table gives the same answer.
 
 Work happens on feature branches and merges through pull requests the
 other developer reviews. Districts live in separate folders so the two
@@ -383,17 +414,30 @@ was verified fixed in a browser before approval.
 | DevOps district | done |
 | Incident response · Digital forensics | done — lifecycle, evidence correlation, containment trade-offs |
 | Game mechanics · Unlocks | done — scoring, missions, unlock order |
-| Responsive · Accessibility & performance | done — zero axe violations on all three districts |
-| Testing | done — 158 tests, CI on every PR |
+| Responsive · Accessibility & performance | done — 0 axe violations across 10 audited surfaces, 2026-09-08 |
+| Testing | done — 397 tests, CI on every PR |
 | Production build · Deployment | done — published to GitHub Pages on every push to main |
 | Documentation | architecture, testing, accessibility and incident-response docs |
-| World map | next — a district switcher stands in for now |
+| World map | done — sector map with live status, built by Kavindu |
 | Event engine · Core | not started |
 
 ## Disclaimer
 
 CLOUDVERSE is an **educational simulation** of digital infrastructure and
-cybersecurity concepts. It does not perform real-world attacks,
-penetration testing, network scanning, or real cloud infrastructure
-operations. Every threat, incident and system in the application is
-fictional data defined inside this repository.
+cybersecurity concepts. It is **not a security monitoring tool and
+monitors nothing** — it is a client-side application that runs entirely
+in the browser, holds no server, reads no telemetry, and has no
+connection to any real system.
+
+It does not perform real-world attacks, penetration testing, network
+scanning, or real cloud infrastructure operations. Every threat,
+incident, host, address, hash, account and campaign in the application
+is fictional data defined inside this repository; network addresses are
+drawn from the ranges reserved for documentation (RFC 5737) so that
+nothing here can point at a real machine even by accident, and a test
+enforces it.
+
+Attack patterns in the Security Intelligence sector are described as
+*shapes to recognise* rather than as procedures — a responder needs to
+know what a thing looks like, and this repository deliberately does not
+contain the steps to reproduce one.
