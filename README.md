@@ -158,6 +158,17 @@ with the reason, because "these two share nothing" is a finding. See
 
 ![The evidence board with an attack chain traced](docs/screenshots/forensics-board.png)
 
+**Network Operations** — the district topology and the traffic crossing
+it. What arrives depends on the world: a healthy district with its
+perimeter intact sees mostly ordinary traffic, and the share worth
+stopping climbs as health falls or defense rules are switched off. The
+queue marks what a sensor found *notable*, never what is malicious — so
+legitimate traffic that looks odd sits in there too, and blocking it
+costs world health, because an outage you caused is still an outage. See
+[`docs/NETWORK_OPERATIONS.md`](docs/NETWORK_OPERATIONS.md).
+
+![Network Operations with a packet's route lit across the topology](docs/screenshots/network-operations.png)
+
 **Operations Center** — a fifth screen that answers "how am I actually
 doing" from the record rather than from a scoreboard. Every district
 writes what happened to an append-only security event log; this screen
@@ -189,8 +200,8 @@ component reaches for `localStorage` itself and progress survives a
 refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
-**Quality** — 336 tests across the rule, service, storage, navigation,
-forensics, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
+**Quality** — 368 tests across the rule, service, storage, navigation,
+forensics, network, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
 accessibility violations on all five screens, verified in a real browser
 rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured

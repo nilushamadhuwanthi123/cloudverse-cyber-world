@@ -20,6 +20,7 @@ export const EVENT_TYPE = {
   DEFENSE_TOGGLE: 'defense-toggle',
   INCIDENT_CLOSED: 'incident-closed',
   FORENSICS_CLOSED: 'forensics-closed',
+  NETWORK_DECISION: 'network-decision',
   MISSION_COMPLETED: 'mission-completed',
 }
 
@@ -153,6 +154,22 @@ export function forensicsClosedEvent({ caseId, correct, chainComplete }, options
   return createEvent(
     EVENT_TYPE.FORENSICS_CLOSED,
     { caseId, correct: Boolean(correct), chainComplete: Boolean(chainComplete) },
+    options
+  )
+}
+
+/**
+ * One allow-or-block decision on captured traffic.
+ *
+ * `malicious` records what the packet actually was, so the log can tell
+ * a missed threat from a false positive after the fact. A single
+ * "correct" flag could not: both are wrong, and they are wrong in
+ * opposite directions.
+ */
+export function networkDecisionEvent({ packetId, action, malicious, correct }, options) {
+  return createEvent(
+    EVENT_TYPE.NETWORK_DECISION,
+    { packetId, action, malicious: Boolean(malicious), correct: Boolean(correct) },
     options
   )
 }

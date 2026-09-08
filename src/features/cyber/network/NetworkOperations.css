@@ -1,0 +1,319 @@
+/*
+ * Network Operations.
+ *
+ * Same two-layout discipline as the forensics board: the positioned map
+ * above the board breakpoint, a plain list below it. Node cards are
+ * 9rem wide against a map that measures ~600px, and the coordinates are
+ * spaced so no two can overlap -- an overlapping card silently swallows
+ * the clicks meant for the one underneath.
+ *
+ * Packet state is written as a word on every row. The colour beside it
+ * is confirmation, never the message.
+ */
+
+.netops__live:empty { display: none; }
+
+.netops__live {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--district-cyber-primary);
+  background: rgba(0, 229, 255, 0.06);
+  border-left: 2px solid var(--district-cyber-primary);
+  border-radius: var(--radius-sm);
+}
+
+.netops__readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+}
+
+.netops__readouts strong { color: var(--text-primary); }
+.netops__readout-note { color: var(--text-secondary); }
+
+/* ---- map ---- */
+
+.netops__map { position: relative; margin-bottom: var(--space-5); }
+
+.netops__links { display: none; }
+
+.netops__nodes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.netops__node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-3);
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.netops__node:hover { border-color: var(--border-active); }
+.netops__node--selected { border-color: var(--district-cyber-primary); }
+.netops__node--on-path { border-left-color: var(--district-cyber-primary); }
+
+.netops__node--firewall { border-left-color: var(--status-stable); }
+.netops__node--gateway { border-left-color: var(--accent-secondary); }
+.netops__node--database { border-left-color: var(--accent-advanced); }
+
+.netops__node-kind {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.netops__node-label { font-size: var(--text-sm); font-weight: 600; }
+
+.netops__node-address,
+.netops__node-flag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.netops__node-flag { color: var(--district-cyber-primary); }
+
+/* ---- panels ---- */
+
+.netops__panel {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.netops__panel-title { margin: 0 0 var(--space-2); font-size: var(--text-base); }
+
+.netops__panel-note,
+.netops__empty {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.netops__empty {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-wide);
+}
+
+.netops__fields { margin: 0; display: grid; gap: var(--space-2); }
+
+.netops__field {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.netops__field dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.netops__field dd { margin: 0; color: var(--text-primary); }
+
+/* ---- queue ---- */
+
+.netops__queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.netops__packet {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.netops__packet:hover { border-color: var(--border-active); }
+.netops__packet--selected { border-color: var(--district-cyber-primary); }
+.netops__packet--suspicious { border-left-color: var(--status-warning); }
+.netops__packet--normal { border-left-color: var(--status-stable); }
+
+.netops__packet-state {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.netops__packet--suspicious .netops__packet-state { color: var(--status-warning); }
+.netops__packet--normal .netops__packet-state { color: var(--status-stable); }
+
+.netops__packet-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.netops__packet-summary { font-size: var(--text-sm); }
+
+.netops__packet-route {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+/* ---- signals and decision ---- */
+
+.netops__signals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.netops__signal {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.netops__decision { display: flex; gap: var(--space-2); }
+
+.netops__action {
+  padding: var(--space-2) var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.netops__action--block:hover { border-color: var(--status-critical); color: var(--status-critical); }
+.netops__action--allow:hover { border-color: var(--status-stable); color: var(--status-stable); }
+.netops__action:hover { border-color: var(--border-active); }
+
+/* ---- outcome ---- */
+
+.netops__outcome {
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.netops__outcome--correct { border-left-color: var(--status-stable); }
+.netops__outcome--wrong { border-left-color: var(--status-critical); }
+
+.netops__outcome-verdict {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+}
+
+.netops__outcome--correct .netops__outcome-verdict { color: var(--status-stable); }
+.netops__outcome--wrong .netops__outcome-verdict { color: var(--status-critical); }
+
+.netops__outcome-explanation,
+.netops__outcome-health {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.netops__outcome-health {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ---- wide screens: the positioned map ---- */
+
+@media (min-width: 900px) {
+  .netops__map {
+    padding: var(--space-4);
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-image:
+      linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .netops__links {
+    display: block;
+    position: absolute;
+    inset: var(--space-4);
+    width: calc(100% - var(--space-6));
+    height: calc(100% - var(--space-6));
+    pointer-events: none;
+  }
+
+  .netops__link {
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .netops__link--lit {
+    stroke: var(--district-cyber-primary);
+    stroke-width: 2.5;
+  }
+
+  .netops__nodes {
+    display: block;
+    position: relative;
+    height: 26rem;
+  }
+
+  .netops__node-slot {
+    position: absolute;
+    left: var(--node-x);
+    top: var(--node-y);
+    width: 9rem;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .netops__node { transition: none !important; }
+}

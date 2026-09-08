@@ -114,6 +114,28 @@ export function describeEvent(event) {
           : `Conclusion not supported by the evidence${event.chainComplete ? ', despite the whole chain being traced' : '; the chain was left incomplete'}.`,
       }
 
+    case EVENT_TYPE.NETWORK_DECISION: {
+      const blocked = event.action === 'block'
+      // Four outcomes, not two: a missed threat and a false positive are
+      // both wrong, and naming them the same thing would hide which.
+      let headline
+      if (event.malicious) headline = blocked ? 'Malicious traffic blocked' : 'Malicious traffic allowed'
+      else headline = blocked ? 'Legitimate traffic blocked' : 'Traffic passed'
+
+      return {
+        id: event.id,
+        at: event.at,
+        tone: event.correct ? FEED_TONE.GOOD : event.malicious ? FEED_TONE.BAD : FEED_TONE.WARN,
+        tag: 'NETWORK',
+        headline,
+        detail: event.correct
+          ? 'The decision matched what the packet turned out to be.'
+          : event.malicious
+            ? 'A threat reached the district.'
+            : 'An outage caused by blocking working traffic.',
+      }
+    }
+
     case EVENT_TYPE.MISSION_COMPLETED:
       return {
         id: event.id,
