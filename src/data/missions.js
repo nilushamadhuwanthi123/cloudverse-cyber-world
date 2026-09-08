@@ -17,7 +17,7 @@ export const MISSIONS = [
     id: 'first-response',
     district: 'cyber',
     title: 'First Response',
-    description: 'Resolve your first threat correctly in the Incident Response panel.',
+    description: 'Resolve your first threat correctly in the Threat Monitor.',
     requires: [],
     goal: { type: 'correctResponses', count: 1 },
   },

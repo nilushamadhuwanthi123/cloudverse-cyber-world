@@ -10,7 +10,7 @@ than a dashboard you read.
 > Cloud and DevOps — over a shared game layer, persistence and test
 > suite. The world map and the central Core are what remain.
 
-![Cyber District — Security Command](docs/screenshots/cyber-district.png)
+![Cyber District — Security Command](docs/screenshots/cyber-sectors.png)
 
 ## The loop
 
@@ -53,7 +53,21 @@ sharing a page.
 
 ## What's built
 
-**Cyber District** — a threat runs a Detected → Analyzing → Active
+**Cyber District** — organised as nine named sectors rather than one long
+page, entered through a short startup sequence. Three ship today: Cyber
+Operations, Incident Response (which one correct threat response opens)
+and Security Analytics. The other six are named, described and honestly
+marked as not deployed yet — a rail that called them "locked" would be
+telling the player to keep playing for something no amount of play will
+deliver. See [`docs/CYBER_SECTORS.md`](docs/CYBER_SECTORS.md).
+
+The rail in the screenshot above says what it means. `LOCKED` is
+something you earn — Incident Response opens on the first correct threat
+response. `OFFLINE` is something that does not exist yet, and no amount
+of play will change that. Collapsing the two into one word is the kind of
+small dishonesty that makes a whole interface untrustworthy.
+
+Inside Cyber Operations, a threat runs a Detected → Analyzing → Active
 lifecycle, and the player picks one of three defense actions. The right
 one restores world health, a wrong one escalates, and every action
 carries an explanation, so a wrong answer still teaches. Threat
@@ -154,8 +168,8 @@ component reaches for `localStorage` itself and progress survives a
 refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
-**Quality** — 265 tests across the rule, service, storage and chart
-layers; lint, tests and build run on every pull request; zero axe-core
+**Quality** — 286 tests across the rule, service, storage, navigation
+and chart layers; lint, tests and build run on every pull request; zero axe-core
 accessibility violations on all five screens, verified in a real browser
 rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured
@@ -235,7 +249,7 @@ reasoning, including where state lives and why.
 ```
 src/
 ├── features/
-│   ├── cyber/      threat panel, defense status, incident command, missions
+│   ├── cyber/      sector rail, boot sequence, threat panel, defenses, missions
 │   ├── cloud/      compute, storage and database locations
 │   ├── devops/     the delivery pipeline and its scenario drills
 │   ├── analytics/  the Operations Center and its SVG charts
@@ -247,10 +261,11 @@ src/
 │   ├── securityScore.js      scoring and streak bonus
 │   ├── riskScore.js          current exposure, derived
 │   ├── missionState.js       unlock order and completion
+│   ├── cyberNavigation.js    which sectors are open, locked or unbuilt
 │   ├── incidentResponse.js   investigation lifecycle
 │   ├── securityEvents.js     the append-only event log
 │   └── securityAnalytics.js  every reading, derived from that log
-├── data/           content: mission definitions, incident cases
+├── data/           content: missions, incident cases, sector catalogue
 ├── services/       the async seam over storage
 ├── storage/        localStorage adapter
 ├── styles/         design tokens and global styles

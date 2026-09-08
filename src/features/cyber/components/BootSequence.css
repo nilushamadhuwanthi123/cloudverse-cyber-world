@@ -1,0 +1,67 @@
+/*
+ * Boot sequence.
+ *
+ * No infinite animation here: the lines appear once and the sequence
+ * ends. An ambient effect that never stops is a battery cost with no
+ * information in it.
+ */
+
+.boot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: flex-start;
+  min-height: 60vh;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.boot__eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  color: var(--district-cyber-primary);
+}
+
+.boot__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+}
+
+.boot__line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.boot__marker { color: var(--district-cyber-primary); }
+.boot__ok { color: var(--status-stable); }
+
+.boot__skip {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.boot__skip:hover {
+  border-color: var(--border-active);
+  color: var(--district-cyber-primary);
+}

@@ -19,9 +19,13 @@ import './SecurityOps.css'
  *
  * The log is read once on mount and again whenever this screen is
  * re-entered, which is enough: nothing can append to it while it is the
- * visible screen, because appending happens in the districts.
+ * visible screen, because appending happens in the other sectors.
+ *
+ * `embedded` drops the screen's own title block for the case where it is
+ * rendered inside the Cyber District's sector stage, which has already
+ * named it. Two titles for one panel is worse than none.
  */
-export default function SecurityOps({ onBackToMap }) {
+export default function SecurityOps({ embedded = false, onBackToMap }) {
   const rootRef = useRef(null)
   const timelineRef = useRef(null)
   // The entrance runs once, when the log first arrives. Clearing the log
@@ -71,10 +75,10 @@ export default function SecurityOps({ onBackToMap }) {
 
   if (events === null) {
     return (
-      <section className="ops" aria-labelledby="ops-title">
-        <h1 id="ops-title" className="ops__title">Security Operations Center</h1>
+      <div className="ops">
+        {!embedded && <h2 className="ops__title">Security Operations Center</h2>}
         <p className="ops__loading" role="status">Reading the event log…</p>
-      </section>
+      </div>
     )
   }
 
@@ -82,11 +86,15 @@ export default function SecurityOps({ onBackToMap }) {
   const hasData = data.eventCount > 0
 
   return (
-    <section ref={rootRef} className="ops" aria-labelledby="ops-title">
+    <div ref={rootRef} className={`ops ${embedded ? 'ops--embedded' : ''}`}>
       <div className="ops__head">
         <div>
-          <p className="ops__eyebrow">SECURITY OPERATIONS</p>
-          <h1 id="ops-title" className="ops__title">Operations Center</h1>
+          {!embedded && (
+            <>
+              <p className="ops__eyebrow">SECURITY OPERATIONS</p>
+              <h2 className="ops__title">Operations Center</h2>
+            </>
+          )}
           <p className="ops__subtitle">
             Every reading below is computed from the {data.eventCount} event
             {data.eventCount === 1 ? '' : 's'} recorded across the districts —
@@ -120,7 +128,7 @@ export default function SecurityOps({ onBackToMap }) {
 
       {!hasData ? (
         <div className="ops-panel ops-panel--empty">
-          <h2 className="ops-panel__heading">No activity recorded yet</h2>
+          <h3 className="ops-panel__heading">No activity recorded yet</h3>
           <p className="ops-panel__note">
             Answer a threat in the Cyber District, work an investigation, or
             toggle a defense rule. Each of those writes one event, and this
@@ -162,7 +170,7 @@ export default function SecurityOps({ onBackToMap }) {
 
       <div className="ops__grid">
         <article className="ops-panel" aria-labelledby="ops-health-heading">
-          <h2 id="ops-health-heading" className="ops-panel__heading">World health over time</h2>
+          <h3 id="ops-health-heading" className="ops-panel__heading">World health over time</h3>
           <p className="ops-panel__note">One reading per threat response.</p>
           <Sparkline
             values={data.health.map((point) => point.value)}
@@ -172,7 +180,7 @@ export default function SecurityOps({ onBackToMap }) {
         </article>
 
         <article className="ops-panel" aria-labelledby="ops-score-heading">
-          <h2 id="ops-score-heading" className="ops-panel__heading">Security score over time</h2>
+          <h3 id="ops-score-heading" className="ops-panel__heading">Security score over time</h3>
           <p className="ops-panel__note">Streak bonuses make good runs steepen.</p>
           <Sparkline
             values={data.score.map((point) => point.value)}
@@ -182,7 +190,7 @@ export default function SecurityOps({ onBackToMap }) {
         </article>
 
         <article className="ops-panel" aria-labelledby="ops-severity-heading">
-          <h2 id="ops-severity-heading" className="ops-panel__heading">Accuracy by severity</h2>
+          <h3 id="ops-severity-heading" className="ops-panel__heading">Accuracy by severity</h3>
           <p className="ops-panel__note">
             Where the mistakes actually are, rather than one blended number.
           </p>
@@ -190,10 +198,10 @@ export default function SecurityOps({ onBackToMap }) {
         </article>
 
         <article className="ops-panel" aria-labelledby="ops-outcome-heading">
-          <h2 id="ops-outcome-heading" className="ops-panel__heading">Outcomes</h2>
+          <h3 id="ops-outcome-heading" className="ops-panel__heading">Outcomes</h3>
           <p className="ops-panel__note">How responses and investigations ended.</p>
 
-          <h3 className="ops-panel__subheading">Threat responses</h3>
+          <h4 className="ops-panel__subheading">Threat responses</h4>
           <OutcomeBar
             parts={[
               { label: 'Contained', value: data.responses.correct, tone: 'good' },
@@ -202,7 +210,7 @@ export default function SecurityOps({ onBackToMap }) {
             emptyLabel="No threats answered yet."
           />
 
-          <h3 className="ops-panel__subheading">Investigations</h3>
+          <h4 className="ops-panel__subheading">Investigations</h4>
           <OutcomeBar
             parts={[
               { label: 'Resolved', value: data.incidents.resolved, tone: 'good' },
@@ -213,7 +221,7 @@ export default function SecurityOps({ onBackToMap }) {
         </article>
 
         <article className="ops-panel ops-panel--wide" aria-labelledby="ops-posture-heading">
-          <h2 id="ops-posture-heading" className="ops-panel__heading">Defensive posture</h2>
+          <h3 id="ops-posture-heading" className="ops-panel__heading">Defensive posture</h3>
           <dl className="ops-facts">
             <div className="ops-facts__item">
               <dt className="ops-facts__key">Defense rules toggled</dt>
@@ -248,7 +256,7 @@ export default function SecurityOps({ onBackToMap }) {
           Back to world map
         </button>
       )}
-    </section>
+    </div>
   )
 }
 

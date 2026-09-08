@@ -10,6 +10,12 @@ import { applyResponseToScore, INITIAL_SECURITY_SCORE_STATE } from '../../game/s
 import { INITIAL_PROGRESS, missionsWithStatus, recordResponse } from '../../game/missionState'
 import { assessRisk } from '../../game/riskScore'
 import {
+  SECTOR_STATE,
+  landingSector,
+  resolveSectors,
+  sectorTally,
+} from '../../game/cyberNavigation'
+import {
   appendEvent,
   defenseToggleEvent,
   incidentClosedEvent,
@@ -28,9 +34,12 @@ import {
   settleIfReduced,
   stopMotion,
 } from '../../lib/motion'
+import SecurityOps from '../analytics/SecurityOps'
+import BootSequence from './components/BootSequence'
 import DefenseStatus from './components/DefenseStatus'
 import IncidentPanel from './components/IncidentPanel'
 import MissionPanel from './components/MissionPanel'
+import SectorRail from './components/SectorRail'
 import SeverityBadge from './components/SeverityBadge'
 import ThreatPanel from './components/ThreatPanel'
 import './CyberDistrict.css'
@@ -40,9 +49,14 @@ const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical']
 /**
  * Cyber District.
  *
- * The integration point for the district: it owns the state the panels
+ * The integration point for the district: it owns the state the sectors
  * share (world health, security score, defense rules, mission progress)
- * and passes each panel only what that panel needs.
+ * and passes each one only what it needs.
+ *
+ * The district is organised as sectors rather than one long page. The
+ * catalogue of what exists lives in data/cyberSectors.js and what is
+ * reachable right now is resolved in game/cyberNavigation.js, so this
+ * component decides layout and nothing else about navigation.
  *
  * Layering, per the architecture doc: rules live in game/, content in
  * data/, and persistence is reached only through services/ -- this
@@ -56,6 +70,10 @@ export default function CyberDistrict({ onExit }) {
   const rootRef = useRef(null)
   const timelineRef = useRef(null)
   const [ready, setReady] = useState(prefersReducedMotion)
+  // The entry sequence runs once per visit to the district, and not at
+  // all for someone who asked for reduced motion.
+  const [booted, setBooted] = useState(prefersReducedMotion)
+  const [requestedSector, setRequestedSector] = useState(null)
   const [activeSeverity, setActiveSeverity] = useState('low')
   const [worldHealth, setWorldHealth] = useState(INITIAL_WORLD_HEALTH)
   const [scoreState, setScoreState] = useState(INITIAL_SECURITY_SCORE_STATE)
@@ -166,7 +184,7 @@ export default function CyberDistrict({ onExit }) {
 
   useEffect(() => {
     const root = rootRef.current
-    if (!root) return
+    if (!root || !booted) return undefined
     const q = (selector) => root.querySelectorAll(selector)
 
     const tl = motionTimeline({
@@ -188,13 +206,24 @@ export default function CyberDistrict({ onExit }) {
     settleIfReduced(tl)
 
     return () => stopMotion(timelineRef.current)
-  }, [])
+  }, [booted])
 
   const missions = missionsWithStatus(progress)
+  const sectors = resolveSectors(progress)
+  const tally = sectorTally(sectors)
+  // Resolved rather than stored: a sector that was open when it was
+  // chosen can be locked again by a reset, and the district must land
+  // somewhere real either way.
+  const activeSectorId = landingSector(sectors, requestedSector)
+  const activeSector = sectors.find((sector) => sector.id === activeSectorId)
   const baseRisk = assessRisk({ worldHealth, ruleStates })
   const risk = {
     ...baseRisk,
     value: Math.max(0, Math.min(100, baseRisk.value + riskOffset)),
+  }
+
+  if (!booted) {
+    return <BootSequence onComplete={() => setBooted(true)} />
   }
 
   return (
@@ -242,70 +271,114 @@ export default function CyberDistrict({ onExit }) {
           : ''}
       </p>
 
-      <div className="cyber-district__grid">
-        <article className="cyber-district__panel" aria-labelledby="threat-severity-heading">
-          <h2 id="threat-severity-heading" className="cyber-district__panel-heading">
-            Threat Severity
-          </h2>
-          <div className="cyber-district__severity-row" role="group" aria-label="Threat severity filter">
-            {SEVERITY_LEVELS.map((level) => (
-              <SeverityBadge
-                key={level}
-                level={level}
-                active={activeSeverity === level}
-                onClick={() => setActiveSeverity(level)}
-              />
-            ))}
-          </div>
-        </article>
+      <div className="cyber-district__shell">
+        <div className="cyber-district__rail">
+          {/* Said out loud, because a rail of nine where six are not
+              available reads as a broken build until it explains itself. */}
+          <p className="cyber-district__tally">
+            {tally.online} of {tally.total} sectors online · {tally.locked} locked ·{' '}
+            {tally.planned} not deployed yet
+          </p>
+          <SectorRail sectors={sectors} activeId={activeSectorId} onSelect={setRequestedSector} />
+        </div>
 
-        <article className="cyber-district__panel" aria-labelledby="incident-response-heading">
-          <h2 id="incident-response-heading" className="cyber-district__panel-heading">
-            Incident Response
-          </h2>
-          <ThreatPanel
-            worldHealth={worldHealth}
-            onHealthChange={applyHealthDelta}
-            onScoreChange={handleResponse}
-          />
-        </article>
+        <div
+          className="cyber-district__stage"
+          id={`sector-panel-${activeSectorId}`}
+          role="tabpanel"
+          aria-labelledby={`sector-tab-${activeSectorId}`}
+          tabIndex={0}
+        >
+          <header className="cyber-district__stage-head">
+            <p className="cyber-district__stage-code">
+              {activeSector.code} · {activeSector.tagline}
+            </p>
+            <h2 className="cyber-district__stage-title">{activeSector.label}</h2>
+            <p className="cyber-district__stage-summary">{activeSector.summary}</p>
+          </header>
 
-        <article className="cyber-district__panel" aria-labelledby="defense-status-heading">
-          <h2 id="defense-status-heading" className="cyber-district__panel-heading">
-            Defense Status
-          </h2>
-          <DefenseStatus
-            ruleStates={ruleStates}
-            onToggleRule={toggleRule}
-            onHealthChange={applyHealthDelta}
-          />
-        </article>
+          {activeSector.state !== SECTOR_STATE.ONLINE && (
+            <div
+              className={`cyber-district__unavailable cyber-district__unavailable--${activeSector.state}`}
+            >
+              <p className="cyber-district__unavailable-status">
+                {activeSector.state === SECTOR_STATE.LOCKED
+                  ? 'ACCESS DENIED'
+                  : 'SECTOR OFFLINE'}
+              </p>
+              <p className="cyber-district__unavailable-reason">{activeSector.reason}</p>
+            </div>
+          )}
 
-        <article className="cyber-district__panel" aria-labelledby="missions-heading">
-          <h2 id="missions-heading" className="cyber-district__panel-heading">
-            Missions
-          </h2>
-          <MissionPanel missions={missions} />
-        </article>
+          {activeSectorId === 'operations' && (
+            <>
+              <div className="cyber-district__grid">
+                <article className="cyber-district__panel" aria-labelledby="threat-severity-heading">
+                  <h3 id="threat-severity-heading" className="cyber-district__panel-heading">
+                    Threat Severity
+                  </h3>
+                  <div className="cyber-district__severity-row" role="group" aria-label="Threat severity filter">
+                    {SEVERITY_LEVELS.map((level) => (
+                      <SeverityBadge
+                        key={level}
+                        level={level}
+                        active={activeSeverity === level}
+                        onClick={() => setActiveSeverity(level)}
+                      />
+                    ))}
+                  </div>
+                </article>
+
+                <article className="cyber-district__panel" aria-labelledby="threat-monitor-heading">
+                  <h3 id="threat-monitor-heading" className="cyber-district__panel-heading">
+                    Threat Monitor
+                  </h3>
+                  <ThreatPanel
+                    worldHealth={worldHealth}
+                    onHealthChange={applyHealthDelta}
+                    onScoreChange={handleResponse}
+                  />
+                </article>
+
+                <article className="cyber-district__panel" aria-labelledby="defense-status-heading">
+                  <h3 id="defense-status-heading" className="cyber-district__panel-heading">
+                    Defense Status
+                  </h3>
+                  <DefenseStatus
+                    ruleStates={ruleStates}
+                    onToggleRule={toggleRule}
+                    onHealthChange={applyHealthDelta}
+                  />
+                </article>
+
+                <article className="cyber-district__panel" aria-labelledby="missions-heading">
+                  <h3 id="missions-heading" className="cyber-district__panel-heading">
+                    Missions
+                  </h3>
+                  <MissionPanel missions={missions} />
+                </article>
+              </div>
+            </>
+          )}
+
+          {activeSectorId === 'incident-response' && activeSector.state === SECTOR_STATE.ONLINE && (
+            <IncidentPanel
+              worldHealth={worldHealth}
+              onRiskChange={(delta) => setRiskOffset((current) => current + delta)}
+              onIncidentResolved={({ appropriateContainment, caseId, rootCauseCorrect, seconds }) => {
+                // A clean response repays some world health; a poor one does not.
+                if (rootCauseCorrect && appropriateContainment) applyHealthDelta(5)
+                record(incidentClosedEvent({ caseId, outcome: 'resolved', seconds }))
+              }}
+              onIncidentEscalated={({ caseId, seconds }) =>
+                record(incidentClosedEvent({ caseId, outcome: 'escalated', seconds }))
+              }
+            />
+          )}
+
+          {activeSectorId === 'analytics' && <SecurityOps embedded />}
+        </div>
       </div>
-
-      <section className="cyber-district__incident" aria-labelledby="incident-command-heading">
-        <h2 id="incident-command-heading" className="cyber-district__panel-heading">
-          Incident Command
-        </h2>
-        <IncidentPanel
-          worldHealth={worldHealth}
-          onRiskChange={(delta) => setRiskOffset((current) => current + delta)}
-          onIncidentResolved={({ appropriateContainment, caseId, rootCauseCorrect, seconds }) => {
-            // A clean response repays some world health; a poor one does not.
-            if (rootCauseCorrect && appropriateContainment) applyHealthDelta(5)
-            record(incidentClosedEvent({ caseId, outcome: 'resolved', seconds }))
-          }}
-          onIncidentEscalated={({ caseId, seconds }) =>
-            record(incidentClosedEvent({ caseId, outcome: 'escalated', seconds }))
-          }
-        />
-      </section>
 
       <button
         type="button"

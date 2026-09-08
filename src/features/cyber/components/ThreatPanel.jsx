@@ -26,7 +26,7 @@ const STAGE_LABEL = {
 }
 
 /**
- * Incident Response panel: one threat at a time, walking Detected ->
+ * Threat Monitor: one threat at a time, walking Detected ->
  * Analyzing -> Active -> Player Response -> Resolved/Escalated.
  *
  * Threat generation, severity, and defense-action correctness all live
