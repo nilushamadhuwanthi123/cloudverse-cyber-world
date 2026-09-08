@@ -107,9 +107,17 @@ export default function App() {
             onExitToIntro={handleExitToIntro}
           />
         ) : view === 'cloud' ? (
-          <CloudDistrict onBackToIntro={() => setView('map')} />
+          <CloudDistrict
+            onBackToIntro={() => setView('map')}
+            onBackToMap={() => setView('map')}
+            onNavigateToDevOps={() => setView('devops')}
+          />
         ) : view === 'devops' ? (
-          <DevOpsPipeline onBackToIntro={() => setView('map')} />
+          <DevOpsPipeline
+            onBackToIntro={() => setView('map')}
+            onBackToMap={() => setView('map')}
+            onNavigateToCloud={() => setView('cloud')}
+          />
         ) : (
           <CyberDistrict onExit={() => setView('map')} />
         )}

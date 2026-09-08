@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { stagger } from 'animejs'
 import {
   PIPELINE_STAGES,
@@ -14,6 +14,7 @@ import {
 import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
 import { loadProgress, saveProgress } from '../../services/progressService'
 import { motionTimeline, settleIfReduced, stopMotion } from '../../lib/motion'
+import CloudDevOpsBridge from '../../components/CloudDevOpsBridge'
 import './DevOpsPipeline.css'
 
 /**
@@ -151,7 +152,7 @@ function getTimestamp() {
  * Implements the continuous deployment highway:
  * CODE -> BUILD -> TEST -> PACKAGE -> DEPLOY -> LIVE
  */
-export default function DevOpsPipeline({ onBackToIntro }) {
+export default function DevOpsPipeline({ onBackToIntro, onBackToMap, onNavigateToCloud }) {
   const [stageStates, setStageStates] = useState(getInitialStageStates)
   const [pipelineState, setPipelineState] = useState(PIPELINE_STATUS.READY)
   const [selectedStageId, setSelectedStageId] = useState('code')
@@ -589,13 +590,25 @@ export default function DevOpsPipeline({ onBackToIntro }) {
             )}
           </div>
 
-          {onBackToIntro && (
+          {onNavigateToCloud && (
             <button
               type="button"
-              className="devops-district__nav-btn"
-              onClick={onBackToIntro}
+              className="devops-district__nav-btn devops-district__bridge-link-btn"
+              onClick={onNavigateToCloud}
+              aria-label="Inspect Cloud Infrastructure"
             >
-              &larr; UPLINK TERMINAL
+              <span aria-hidden="true">&larr;</span>
+              <span>☁️ CLOUD FABRIC</span>
+            </button>
+          )}
+
+          {(onBackToMap || onBackToIntro) && (
+            <button
+              type="button"
+              className="devops-district__nav-btn devops-district__back-map-btn"
+              onClick={onBackToMap || onBackToIntro}
+            >
+              &larr; WORLD MAP
             </button>
           )}
         </div>
@@ -613,6 +626,14 @@ export default function DevOpsPipeline({ onBackToIntro }) {
             vaulting, rolling deployment, and production runtime.
           </p>
         </header>
+
+        {/* Cloud ↔ DevOps Infrastructure Delivery Bridge */}
+        <CloudDevOpsBridge
+          currentDistrict="devops"
+          onNavigate={onNavigateToCloud}
+          pipelineStatus={pipelineState}
+          worldHealth={worldHealth}
+        />
 
         {/* Global Pipeline Action Bar & Control Highway */}
         <div className="devops-highway-controls">
@@ -689,7 +710,7 @@ export default function DevOpsPipeline({ onBackToIntro }) {
               </h3>
               <p className="devops-success-banner__desc">
                 All six CI/CD stages completed nominal execution. Canary pods verified healthy and
-                routing 100% production traffic. World Health +5 awarded.
+                routing 100% production traffic backed by Cloud District compute &amp; storage nodes. World Health +5 awarded.
               </p>
             </div>
             <span className="devops-success-banner__badge">[ WORLD HEALTH +5 ]</span>
