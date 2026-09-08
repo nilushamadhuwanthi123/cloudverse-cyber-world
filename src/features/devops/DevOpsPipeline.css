@@ -336,6 +336,33 @@
   outline-offset: 2px;
 }
 
+.devops-district__bridge-link-btn {
+  color: var(--district-cloud-primary);
+  border-color: rgba(0, 229, 255, 0.45);
+  background: rgba(0, 229, 255, 0.08);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.devops-district__bridge-link-btn:hover {
+  color: #fff;
+  background: rgba(0, 229, 255, 0.22);
+  border-color: var(--district-cloud-primary);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.devops-district__back-map-btn {
+  color: var(--text-secondary);
+}
+
+.devops-district__back-map-btn:hover {
+  color: var(--district-devops-primary);
+  border-color: var(--district-devops-primary);
+}
+
 /* ------------------------------------------------------------
    MAIN WORLD CANVAS
    ------------------------------------------------------------ */

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { stagger } from 'animejs'
 import { CLOUD_LOCATIONS } from './cloudLocations'
 import {
@@ -10,6 +10,7 @@ import {
 import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
 import { loadProgress, saveProgress } from '../../services/progressService'
 import { motionTimeline, settleIfReduced, stopMotion } from '../../lib/motion'
+import CloudDevOpsBridge from '../../components/CloudDevOpsBridge'
 import './CloudDistrict.css'
 
 /**
@@ -107,7 +108,7 @@ const INITIAL_OPERATIONS = {
  * - Phase 2 (Incidents & World Health): Deterministic cloud incident lifecycle (High Traffic,
  *   Server Failure, Storage Capacity Exhaustion) with World Health integration (+5 / -10).
  */
-export default function CloudDistrict({ onBackToIntro }) {
+export default function CloudDistrict({ onBackToIntro, onBackToMap, onNavigateToDevOps }) {
   const [selectedId, setSelectedId] = useState(null)
   const [operations, setOperations] = useState(INITIAL_OPERATIONS)
   const [worldHealth, setWorldHealth] = useState(INITIAL_WORLD_HEALTH)
@@ -975,13 +976,25 @@ export default function CloudDistrict({ onBackToIntro }) {
             )}
           </div>
 
-          {onBackToIntro && (
+          {onNavigateToDevOps && (
             <button
               type="button"
-              className="cloud-district__nav-btn"
-              onClick={onBackToIntro}
+              className="cloud-district__nav-btn cloud-district__bridge-link-btn"
+              onClick={onNavigateToDevOps}
+              aria-label="Navigate to DevOps Pipeline"
             >
-              &larr; UPLINK TERMINAL
+              <span>⚡ DEVOPS PIPELINE</span>
+              <span aria-hidden="true">&rarr;</span>
+            </button>
+          )}
+
+          {(onBackToMap || onBackToIntro) && (
+            <button
+              type="button"
+              className="cloud-district__nav-btn cloud-district__back-map-btn"
+              onClick={onBackToMap || onBackToIntro}
+            >
+              &larr; WORLD MAP
             </button>
           )}
         </div>
@@ -1054,6 +1067,13 @@ export default function CloudDistrict({ onBackToIntro }) {
             and transactional data flow.
           </p>
         </header>
+
+        {/* Cloud ↔ DevOps Infrastructure Delivery Bridge */}
+        <CloudDevOpsBridge
+          currentDistrict="cloud"
+          onNavigate={onNavigateToDevOps}
+          worldHealth={worldHealth}
+        />
 
         {/* Topology Network */}
         <div className="cloud-district__topology">

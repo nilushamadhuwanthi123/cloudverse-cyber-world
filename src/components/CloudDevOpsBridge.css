@@ -1,0 +1,298 @@
+/* ============================================================
+   CLOUD + DEVOPS VISUAL BRIDGE COMPONENT STYLING
+   ============================================================ */
+
+.cloud-devops-bridge {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  margin: var(--space-4) 0;
+  box-sizing: border-box;
+}
+
+.cloud-devops-bridge__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-glass, rgba(10, 16, 36, 0.72));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(var(--glass-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 12px));
+  box-shadow: 0 4px 20px rgba(5, 8, 22, 0.4);
+}
+
+.cloud-devops-bridge--cloud .cloud-devops-bridge__inner {
+  border-left: 3px solid var(--district-cloud-primary);
+}
+
+.cloud-devops-bridge--devops .cloud-devops-bridge__inner {
+  border-left: 3px solid var(--district-devops-primary);
+}
+
+/* Header */
+.cloud-devops-bridge__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-2);
+}
+
+.cloud-devops-bridge__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-wider);
+  color: var(--status-stable);
+}
+
+.cloud-devops-bridge__pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--status-stable);
+  box-shadow: 0 0 8px var(--status-stable);
+  animation: bridgePulse 2s ease-in-out infinite;
+}
+
+.cloud-devops-bridge__telemetry-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.cloud-devops-bridge__telemetry-key {
+  color: var(--text-muted);
+}
+
+.cloud-devops-bridge__telemetry-val {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+/* 3-Tier Flow */
+.cloud-devops-bridge__flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.cloud-devops-bridge__node {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(5, 8, 22, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all var(--dur-fast) ease;
+}
+
+.cloud-devops-bridge__node--active {
+  border-color: var(--accent-primary);
+  background: rgba(0, 229, 255, 0.08);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+}
+
+.cloud-devops-bridge--devops .cloud-devops-bridge__node--active {
+  border-color: var(--district-devops-primary);
+  background: rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
+}
+
+.cloud-devops-bridge__node-icon {
+  font-size: 1.25rem;
+}
+
+.cloud-devops-bridge__node-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cloud-devops-bridge__node-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.cloud-devops-bridge__node-name {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.cloud-devops-bridge__node-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Connector SVG */
+.cloud-devops-bridge__connector {
+  width: 40px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cloud-devops-bridge__svg-flow {
+  width: 100%;
+  height: 100%;
+}
+
+.cloud-devops-bridge__flow-line {
+  animation: flowDash 1.5s linear infinite;
+}
+
+@keyframes flowDash {
+  from {
+    stroke-dashoffset: 8;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes bridgePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+/* Actions */
+.cloud-devops-bridge__action {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.cloud-devops-bridge__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  transition: all var(--dur-fast) ease;
+}
+
+.cloud-devops-bridge__btn--devops {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--district-devops-primary);
+  border: 1px solid var(--district-devops-primary);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+.cloud-devops-bridge__btn--devops:hover {
+  background: var(--district-devops-primary);
+  color: var(--cv-ice);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.cloud-devops-bridge__btn--cloud {
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--district-cloud-primary);
+  border: 1px solid var(--district-cloud-primary);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+}
+
+.cloud-devops-bridge__btn--cloud:hover {
+  background: var(--district-cloud-primary);
+  color: var(--text-on-accent);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.cloud-devops-bridge__btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.cloud-devops-bridge__btn-arrow {
+  transition: transform 0.2s ease;
+}
+
+.cloud-devops-bridge__btn--devops:hover .cloud-devops-bridge__btn-arrow {
+  transform: translateX(4px);
+}
+
+.cloud-devops-bridge__btn--cloud:hover .cloud-devops-bridge__btn-arrow {
+  transform: translateX(-4px);
+}
+
+/* ============================================================
+   RESPONSIVE LAYOUT
+   ============================================================ */
+@media (max-width: 860px) {
+  .cloud-devops-bridge__flow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cloud-devops-bridge__connector {
+    width: 20px;
+    height: 24px;
+    align-self: center;
+    transform: rotate(90deg);
+  }
+
+  .cloud-devops-bridge__action {
+    justify-content: stretch;
+  }
+
+  .cloud-devops-bridge__btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .cloud-devops-bridge__pulse-dot,
+  .cloud-devops-bridge__flow-line {
+    animation: none !important;
+  }
+
+  .cloud-devops-bridge__node,
+  .cloud-devops-bridge__btn {
+    transition: none !important;
+  }
+}
