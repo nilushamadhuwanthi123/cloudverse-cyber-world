@@ -150,10 +150,21 @@ export function incidentClosedEvent({ caseId, outcome, seconds }, options) {
  * analytics screen counting misidentified cases as cases handed to tier
  * 2. Two different things deserve two names.
  */
-export function forensicsClosedEvent({ caseId, correct, chainComplete }, options) {
+export function forensicsClosedEvent(
+  { caseId, correct, chainComplete, indicators = [] },
+  options
+) {
   return createEvent(
     EVENT_TYPE.FORENSICS_CLOSED,
-    { caseId, correct: Boolean(correct), chainComplete: Boolean(chainComplete) },
+    {
+      caseId,
+      correct: Boolean(correct),
+      chainComplete: Boolean(chainComplete),
+      // What the player flagged. Security Intelligence reads these back
+      // to say which of its indicators this run has actually seen, which
+      // is the difference between a live sector and an encyclopaedia.
+      indicators: Array.isArray(indicators) ? [...indicators] : [],
+    },
     options
   )
 }

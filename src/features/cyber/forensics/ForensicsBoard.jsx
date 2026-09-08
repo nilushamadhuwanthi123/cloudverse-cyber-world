@@ -106,6 +106,7 @@ export default function ForensicsBoard({ onCaseClosed }) {
       caseId: forensicCase.caseId,
       correct: result.correct,
       chainComplete: score.chainComplete,
+      indicators: flagged,
     })
   }
 

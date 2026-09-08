@@ -77,8 +77,8 @@ export const CYBER_SECTORS = Object.freeze([
     label: 'Security Intelligence',
     tagline: 'Indicators, actors, campaigns',
     summary:
-      'Correlating an indicator to an actor to a campaign to an incident already closed in this district.',
-    availability: SECTOR_AVAILABILITY.PLANNED,
+      'Correlating an indicator to an actor, a campaign and its patterns — and to the case in this run where you flagged it.',
+    availability: SECTOR_AVAILABILITY.OPEN,
   }),
   Object.freeze({
     id: 'lab',
