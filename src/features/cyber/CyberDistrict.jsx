@@ -9,6 +9,7 @@ import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
 import { applyResponseToScore, INITIAL_SECURITY_SCORE_STATE } from '../../game/securityScore'
 import { INITIAL_PROGRESS, missionsWithStatus, recordResponse } from '../../game/missionState'
 import { assessRisk } from '../../game/riskScore'
+import { getSystemStatusLevel } from '../../game/systemHealth'
 import {
   SECTOR_STATE,
   landingSector,
@@ -39,7 +40,9 @@ import BootSequence from './components/BootSequence'
 import DefenseStatus from './components/DefenseStatus'
 import IncidentPanel from './components/IncidentPanel'
 import MissionPanel from './components/MissionPanel'
+import EventFeed from './components/EventFeed'
 import SectorRail from './components/SectorRail'
+import SystemStatus from './components/SystemStatus'
 import SeverityBadge from './components/SeverityBadge'
 import ThreatPanel from './components/ThreatPanel'
 import './CyberDistrict.css'
@@ -90,6 +93,11 @@ export default function CyberDistrict({ onExit }) {
   // appending is a side effect, which must not live inside a state
   // updater that React is free to run more than once.
   const eventsRef = useRef([])
+  // The ref is where appends happen; this mirrors it so the feed
+  // re-renders. Two holders of one list is a smell, but the alternative
+  // -- appending inside a state updater -- puts a side effect somewhere
+  // React is free to run twice.
+  const [feed, setFeed] = useState([])
 
   // Load once on mount. A failed or empty load leaves the fresh
   // defaults in place, so the district is always playable.
@@ -102,7 +110,9 @@ export default function CyberDistrict({ onExit }) {
       setWorldHealth(saved.worldHealth)
     })
     loadEvents().then((saved) => {
-      if (!cancelled) eventsRef.current = saved
+      if (cancelled) return
+      eventsRef.current = saved
+      setFeed(saved)
     })
     return () => {
       cancelled = true
@@ -124,6 +134,7 @@ export default function CyberDistrict({ onExit }) {
   const record = useCallback((event) => {
     eventsRef.current = appendEvent(eventsRef.current, event)
     saveEvents(eventsRef.current)
+    setFeed(eventsRef.current)
   }, [])
 
   const toggleRule = useCallback(
@@ -227,7 +238,12 @@ export default function CyberDistrict({ onExit }) {
   }
 
   return (
-    <section ref={rootRef} className="cyber-district" aria-labelledby="cyber-district-title">
+    <section
+      ref={rootRef}
+      className="cyber-district"
+      aria-labelledby="cyber-district-title"
+      data-world-state={getSystemStatusLevel(worldHealth)}
+    >
       <p className="cyber-district__eyebrow">CYBER DISTRICT</p>
       <div className="cyber-district__title-row">
         <h1 id="cyber-district-title" className="cyber-district__title">
@@ -356,6 +372,27 @@ export default function CyberDistrict({ onExit }) {
                     Missions
                   </h3>
                   <MissionPanel missions={missions} />
+                </article>
+
+                <article className="cyber-district__panel" aria-labelledby="system-status-heading">
+                  <h3 id="system-status-heading" className="cyber-district__panel-heading">
+                    System Status
+                  </h3>
+                  <SystemStatus worldHealth={worldHealth} ruleStates={ruleStates} risk={risk} />
+                </article>
+
+                <article
+                  className="cyber-district__panel cyber-district__panel--wide"
+                  aria-labelledby="event-feed-heading"
+                >
+                  <h3 id="event-feed-heading" className="cyber-district__panel-heading">
+                    Security Event Feed
+                  </h3>
+                  <p className="cyber-district__panel-note">
+                    The same log the Analytics sector derives its charts from, read
+                    newest first.
+                  </p>
+                  <EventFeed events={feed} />
                 </article>
               </div>
             </>

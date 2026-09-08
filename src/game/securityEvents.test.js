@@ -21,6 +21,28 @@ describe('createEvent', () => {
   })
 })
 
+describe('event ids', () => {
+  // One response can complete two missions at once, so two events in the
+  // same millisecond is normal. React uses these as list keys: a
+  // collision makes it render one row twice and drop the other, which is
+  // how this surfaced -- a feed showing one mission twice and hiding
+  // another.
+  it('are unique for events created in the same millisecond', () => {
+    const frozen = { now: () => 1000 }
+    const ids = new Set([
+      missionCompletedEvent({ missionId: 'a' }, frozen).id,
+      missionCompletedEvent({ missionId: 'b' }, frozen).id,
+      threatResponseEvent({ severity: 'low', correct: true }, frozen).id,
+    ])
+
+    expect(ids.size).toBe(3)
+  })
+
+  it('still carry the timestamp they were given', () => {
+    expect(missionCompletedEvent({ missionId: 'a' }, { now: () => 4242 }).at).toBe(4242)
+  })
+})
+
 describe('appendEvent', () => {
   it('returns a new array and leaves the original alone', () => {
     const first = [threatResponseEvent({ severity: 'low', correct: true }, at(1))]
