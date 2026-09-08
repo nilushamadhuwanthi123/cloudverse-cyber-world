@@ -68,9 +68,11 @@ function LocationGlyph({ type }) {
 }
 
 /**
- * Cloud District: Step 1 Visual Environment & Location Discovery.
+ * Cloud District: Step 2 Technical Inspection Experience.
  *
- * Implements the 3 discoverable locations:
+ * Preserves Step 1 visual environment, navigation, node interactions,
+ * and return-to-intro behavior while deepening the technical inspection HUD
+ * with structured fictional telemetry and system metrics for:
  * - Compute Island
  * - Storage Valley
  * - Database Lake
@@ -79,6 +81,8 @@ export default function CloudDistrict({ onBackToIntro }) {
   const [selectedId, setSelectedId] = useState(null)
   const rootRef = useRef(null)
   const timelineRef = useRef(null)
+  const detailPanelRef = useRef(null)
+  const detailTimelineRef = useRef(null)
 
   const selectedLocation = CLOUD_LOCATIONS.find((loc) => loc.id === selectedId) || null
 
@@ -101,7 +105,7 @@ export default function CloudDistrict({ onBackToIntro }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selectedId, handleCloseDetail])
 
-  // Anime.js entry animation
+  // Anime.js initial mount entry animation
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
@@ -141,6 +145,51 @@ export default function CloudDistrict({ onBackToIntro }) {
 
     return () => stopMotion(timelineRef.current)
   }, [])
+
+  // Anime.js inspection panel entry animation on location select
+  useEffect(() => {
+    if (!selectedId) return
+    const panel = detailPanelRef.current
+    if (!panel) return
+
+    // Stop any previous detail animation before starting a new one
+    stopMotion(detailTimelineRef.current)
+
+    const tl = motionTimeline({
+      defaults: { ease: 'out(3)' },
+    })
+
+    tl.add(panel, {
+      opacity: [0, 1],
+      y: [14, 0],
+      duration: 320,
+    })
+      .add(
+        panel.querySelectorAll('.cloud-detail__metric-card'),
+        {
+          opacity: [0, 1],
+          y: [10, 0],
+          duration: 300,
+          delay: stagger(35),
+        },
+        '-=180',
+      )
+      .add(
+        panel.querySelectorAll('.cloud-detail__spec-row, .cloud-detail__feature-item'),
+        {
+          opacity: [0, 1],
+          x: [-8, 0],
+          duration: 250,
+          delay: stagger(20),
+        },
+        '-=150',
+      )
+
+    settleIfReduced(tl)
+    detailTimelineRef.current = tl
+
+    return () => stopMotion(detailTimelineRef.current)
+  }, [selectedId])
 
   return (
     <div ref={rootRef} className="cloud-district">
@@ -274,21 +323,27 @@ export default function CloudDistrict({ onBackToIntro }) {
           </div>
         </div>
 
-        {/* Location Detail Inspection Panel (Local UI Response) */}
+        {/* Location Detail Inspection Panel (Futuristic Cloud Infrastructure HUD) */}
         {selectedLocation && (
           <section
             id="cloud-detail-panel"
+            ref={detailPanelRef}
             className="cloud-detail"
             aria-labelledby="cloud-detail-title"
           >
+            {/* Header: Title, Sector Metadata & Close Control */}
             <div className="cloud-detail__header">
-              <div>
+              <div className="cloud-detail__header-info">
                 <div className="cloud-detail__meta">
                   <span className="cloud-detail__code">{selectedLocation.code}</span>
                   <span className="cloud-detail__coords">
                     {selectedLocation.coordinates}
                   </span>
-                  <span className="cloud-district__hud-badge">
+                  <span className="cloud-detail__badge">
+                    {selectedLocation.badge}
+                  </span>
+                  <span className="cloud-detail__status-tag">
+                    <span className="cloud-detail__status-beacon" aria-hidden="true" />
                     {selectedLocation.status}
                   </span>
                 </div>
@@ -304,28 +359,109 @@ export default function CloudDistrict({ onBackToIntro }) {
                 onClick={handleCloseDetail}
                 aria-label={`Close ${selectedLocation.title} inspection`}
               >
-                <span>&times;</span>
+                <span aria-hidden="true">&times;</span>
                 <span>CLOSE [ESC]</span>
               </button>
             </div>
 
-            <div className="cloud-detail__grid">
-              {/* Telemetry Metrics */}
-              <div>
-                <h4 className="cloud-detail__section-title">Telemetry & Status</h4>
-                <div className="cloud-detail__telemetry-grid">
-                  {selectedLocation.telemetry.map((stat) => (
-                    <div key={stat.label} className="cloud-detail__stat-card">
-                      <div className="cloud-detail__stat-label">{stat.label}</div>
-                      <div className="cloud-detail__stat-value">{stat.value}</div>
+            {/* Primary Section: Real-Time Telemetry Metrics */}
+            <div className="cloud-detail__telemetry-section">
+              <div className="cloud-detail__section-header">
+                <h4 className="cloud-detail__section-title">
+                  <span className="cloud-detail__section-icon" aria-hidden="true">
+                    //
+                  </span>
+                  Technical Telemetry &amp; Metrics
+                </h4>
+                <div className="cloud-detail__live-indicator">
+                  <span className="cloud-detail__pulse-dot" aria-hidden="true" />
+                  <span>LIVE TELEMETRY BUS</span>
+                </div>
+              </div>
+
+              <div className="cloud-detail__metrics-grid">
+                {selectedLocation.metrics.map((metric) => (
+                  <div key={metric.label} className="cloud-detail__metric-card">
+                    <div className="cloud-detail__metric-header">
+                      <span className="cloud-detail__metric-label">
+                        {metric.label}
+                      </span>
+                      {metric.type === 'status' && (
+                        <span
+                          className={`cloud-detail__status-pill cloud-detail__status-pill--${
+                            metric.statusVariant || 'stable'
+                          }`}
+                        >
+                          <span
+                            className="cloud-detail__pulse-dot"
+                            aria-hidden="true"
+                          />
+                          {metric.value}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="cloud-detail__metric-body">
+                      <div className="cloud-detail__metric-value">
+                        {metric.value}
+                      </div>
+                      {metric.subValue && (
+                        <div className="cloud-detail__metric-sub">
+                          {metric.subValue}
+                        </div>
+                      )}
+                    </div>
+
+                    {metric.percent !== undefined && (
+                      <div
+                        className="cloud-detail__progress"
+                        role="progressbar"
+                        aria-valuenow={metric.percent}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${metric.label}: ${metric.percent}%`}
+                      >
+                        <div
+                          className={`cloud-detail__progress-fill ${
+                            metric.statusVariant === 'warning'
+                              ? 'cloud-detail__progress-fill--warning'
+                              : ''
+                          }`}
+                          style={{ width: `${metric.percent}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Secondary Section: Deep Infrastructure Subsystems & Capabilities */}
+            <div className="cloud-detail__subsystems-grid">
+              {/* Technical Specifications */}
+              <div className="cloud-detail__subsystem-col">
+                <h4 className="cloud-detail__section-title">
+                  <span className="cloud-detail__section-icon" aria-hidden="true">
+                    //
+                  </span>
+                  Hardware Fabric &amp; Architecture
+                </h4>
+                <div className="cloud-detail__specs-list">
+                  {selectedLocation.technicalSpecs.map((spec) => (
+                    <div key={spec.label} className="cloud-detail__spec-row">
+                      <span className="cloud-detail__spec-label">{spec.label}</span>
+                      <span className="cloud-detail__spec-value">{spec.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Architectural Capabilities */}
-              <div>
+              <div className="cloud-detail__subsystem-col">
                 <h4 className="cloud-detail__section-title">
+                  <span className="cloud-detail__section-icon" aria-hidden="true">
+                    //
+                  </span>
                   Architectural Capabilities
                 </h4>
                 <ul className="cloud-detail__features-list">
@@ -343,6 +479,28 @@ export default function CloudDistrict({ onBackToIntro }) {
                 </ul>
               </div>
             </div>
+
+            {/* HUD Status Bar Footer */}
+            <footer className="cloud-detail__footer">
+              <div className="cloud-detail__footer-item">
+                <span className="cloud-detail__footer-bullet" aria-hidden="true">
+                  ■
+                </span>
+                <span>SECURITY ENCLAVE: HARDWARE ISOLATED</span>
+              </div>
+              <div className="cloud-detail__footer-item">
+                <span className="cloud-detail__footer-bullet" aria-hidden="true">
+                  ■
+                </span>
+                <span>FAILOVER TOPOLOGY: MULTI-REGION ACTIVE</span>
+              </div>
+              <div className="cloud-detail__footer-item">
+                <span className="cloud-detail__footer-bullet" aria-hidden="true">
+                  ■
+                </span>
+                <span>IPC BUS: NOMINAL</span>
+              </div>
+            </footer>
           </section>
         )}
       </main>
