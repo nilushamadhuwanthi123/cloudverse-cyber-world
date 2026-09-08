@@ -102,6 +102,18 @@ export function describeEvent(event) {
             : `Handed to tier 2${typeof event.seconds === 'number' ? ` after ${event.seconds}s` : ''}.`,
       }
 
+    case EVENT_TYPE.FORENSICS_CLOSED:
+      return {
+        id: event.id,
+        at: event.at,
+        tone: event.correct ? FEED_TONE.GOOD : FEED_TONE.BAD,
+        tag: event.caseId ?? 'FORENSICS',
+        headline: event.correct ? 'Case file closed' : 'Case file misidentified',
+        detail: event.correct
+          ? `Conclusion supported by the evidence${event.chainComplete ? ', whole chain traced' : ', chain left incomplete'}.`
+          : `Conclusion not supported by the evidence${event.chainComplete ? ', despite the whole chain being traced' : '; the chain was left incomplete'}.`,
+      }
+
     case EVENT_TYPE.MISSION_COMPLETED:
       return {
         id: event.id,

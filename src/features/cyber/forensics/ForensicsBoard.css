@@ -1,0 +1,381 @@
+/*
+ * Evidence board.
+ *
+ * Two layouts, not one scaled down. Wide screens get the positioned
+ * board with the link layer; below 900px the positioning is dropped and
+ * the same artefacts stack as a list. Nothing is lost in the change,
+ * because the connections are written out in words underneath either
+ * way -- the drawing was never the only place they existed.
+ */
+
+.forensics__live:empty { display: none; }
+
+.forensics__live {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--district-cyber-primary);
+  background: rgba(0, 229, 255, 0.06);
+  border-left: 2px solid var(--district-cyber-primary);
+  border-radius: var(--radius-sm);
+}
+
+.forensics__case-id {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  color: var(--district-cyber-primary);
+}
+
+.forensics__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
+}
+
+.forensics__brief {
+  margin: 0 0 var(--space-4);
+  max-width: 66ch;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.forensics__progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+}
+
+.forensics__progress strong { color: var(--text-primary); }
+
+.forensics__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+/* ---- the board ---- */
+
+.forensics__board { position: relative; }
+
+.forensics__links {
+  display: none;
+}
+
+.forensics__nodes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.forensics__node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.forensics__node:hover { border-color: var(--border-active); }
+
+.forensics__node--selected {
+  border-color: var(--district-cyber-primary);
+  border-left-color: var(--district-cyber-primary);
+}
+
+.forensics__node--source {
+  border-left-color: var(--status-warning);
+}
+
+.forensics__node--linked {
+  border-left-color: var(--status-stable);
+}
+
+.forensics__node-kind {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.forensics__node-label { font-size: var(--text-sm); font-weight: 600; }
+
+.forensics__node-time,
+.forensics__node-state {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.forensics__node-state { color: var(--status-stable); }
+
+/* ---- inspector ---- */
+
+.forensics__inspector {
+  padding: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.forensics__inspector-kind {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.forensics__inspector-title { margin: 0 0 var(--space-2); font-size: var(--text-base); }
+
+.forensics__inspector-detail {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.forensics__fields { margin: 0 0 var(--space-4); display: grid; gap: var(--space-2); }
+
+.forensics__field {
+  display: grid;
+  grid-template-columns: 11rem 1fr;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.forensics__field dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.forensics__field dd { margin: 0; font-family: var(--font-mono); color: var(--text-primary); }
+
+/* ---- actions ---- */
+
+.forensics__action {
+  display: inline-block;
+  margin-right: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.forensics__action:hover:not(:disabled) {
+  border-color: var(--border-active);
+  color: var(--district-cyber-primary);
+}
+
+.forensics__action:disabled { opacity: 0.6; cursor: not-allowed; }
+.forensics__action--quiet { color: var(--text-secondary); }
+
+/* ---- findings ---- */
+
+.forensics__findings,
+.forensics__indicators,
+.forensics__conclusion {
+  margin-top: var(--space-5);
+}
+
+.forensics__findings-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.forensics__empty,
+.forensics__hint {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.forensics__traced,
+.forensics__indicator-list,
+.forensics__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.forensics__traced-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+  background: var(--surface-2);
+  border-left: 2px solid var(--status-stable);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.forensics__traced-via {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.forensics__indicator-list { flex-direction: row; flex-wrap: wrap; }
+
+.forensics__indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+/* Flagged says FLAGGED as well as changing colour. */
+.forensics__indicator--flagged {
+  border-color: var(--status-warning);
+  color: var(--status-warning);
+}
+
+.forensics__indicator-state { color: var(--text-secondary); }
+.forensics__indicator--flagged .forensics__indicator-state { color: var(--status-warning); }
+
+.forensics__option {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.forensics__option:hover { border-color: var(--border-active); }
+
+.forensics__verdict {
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.forensics__verdict--correct { border-left-color: var(--status-stable); }
+.forensics__verdict--wrong { border-left-color: var(--status-critical); }
+
+.forensics__verdict-line {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+}
+
+.forensics__verdict--correct .forensics__verdict-line { color: var(--status-stable); }
+.forensics__verdict--wrong .forensics__verdict-line { color: var(--status-critical); }
+
+.forensics__verdict-explanation {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* ---- wide screens: the positioned board ---- */
+
+/*
+ * Measured, not guessed: inside the sector stage a two-column split left
+ * the board 320px wide while each card is 184px -- 57% of the board.
+ * No arrangement of three columns fits in that, and cards ended up
+ * stacked on top of each other, where the one on top silently swallows
+ * the clicks meant for the one beneath. The board now takes the full
+ * width of the stage and the inspector sits under it.
+ */
+@media (min-width: 900px) {
+  .forensics__layout { grid-template-columns: 1fr; }
+
+  .forensics__board {
+    min-height: 34rem;
+    padding: var(--space-4);
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-image:
+      linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .forensics__links {
+    display: block;
+    position: absolute;
+    inset: var(--space-4);
+    width: calc(100% - var(--space-6));
+    height: calc(100% - var(--space-6));
+    pointer-events: none;
+  }
+
+  .forensics__link {
+    stroke: var(--status-stable);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.7;
+  }
+
+  .forensics__nodes {
+    display: block;
+    position: relative;
+    height: 32rem;
+  }
+
+  /* Cards are narrow enough, and the coordinates spaced far enough, that
+     two can never overlap. An overlapping card does not merely look
+     untidy -- it swallows the clicks meant for the one underneath. */
+  .forensics__node-slot {
+    position: absolute;
+    left: var(--node-x);
+    top: var(--node-y);
+    width: 11.5rem;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forensics__node { transition: none !important; }
+}

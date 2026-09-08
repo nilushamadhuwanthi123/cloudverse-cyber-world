@@ -19,6 +19,7 @@ import {
 import {
   appendEvent,
   defenseToggleEvent,
+  forensicsClosedEvent,
   incidentClosedEvent,
   missionCompletedEvent,
   threatResponseEvent,
@@ -36,6 +37,7 @@ import {
   stopMotion,
 } from '../../lib/motion'
 import SecurityOps from '../analytics/SecurityOps'
+import ForensicsBoard from './forensics/ForensicsBoard'
 import BootSequence from './components/BootSequence'
 import DefenseStatus from './components/DefenseStatus'
 import IncidentPanel from './components/IncidentPanel'
@@ -409,6 +411,14 @@ export default function CyberDistrict({ onExit }) {
               }}
               onIncidentEscalated={({ caseId, seconds }) =>
                 record(incidentClosedEvent({ caseId, outcome: 'escalated', seconds }))
+              }
+            />
+          )}
+
+          {activeSectorId === 'forensics' && (
+            <ForensicsBoard
+              onCaseClosed={({ caseId, chainComplete, correct }) =>
+                record(forensicsClosedEvent({ caseId, correct, chainComplete }))
               }
             />
           )}

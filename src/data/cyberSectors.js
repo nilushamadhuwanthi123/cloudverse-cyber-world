@@ -59,8 +59,8 @@ export const CYBER_SECTORS = Object.freeze([
     label: 'Digital Forensics',
     tagline: 'Evidence board and attack chains',
     summary:
-      'A standalone forensic workspace: artefacts, hashes, indicators, and the relationships between them drawn rather than listed.',
-    availability: SECTOR_AVAILABILITY.PLANNED,
+      'Artefacts with real metadata — hashes, addresses, accounts, paths — and connections you find by noticing what two records have in common, rather than being handed a diagram.',
+    availability: SECTOR_AVAILABILITY.OPEN,
   }),
   Object.freeze({
     id: 'network',

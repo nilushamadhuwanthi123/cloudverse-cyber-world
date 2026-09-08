@@ -147,6 +147,17 @@ outbound connection that followed. One is ordinary background noise a
 running system produces at the same time, and selecting it is marked as
 such. No single line proves anything; the order does.
 
+**Digital Forensics** — artefacts carrying real metadata, and
+connections you find rather than are given. Two records can be traced to
+each other only when they share an indicator — an address, an account, a
+hash, an object — and that is derived from the evidence, not from a list
+of edges someone authored, so the picture on the board cannot disagree
+with the records behind it. Attempting an unsupported trace is refused
+with the reason, because "these two share nothing" is a finding. See
+[`docs/FORENSICS.md`](docs/FORENSICS.md).
+
+![The evidence board with an attack chain traced](docs/screenshots/forensics-board.png)
+
 **Operations Center** — a fifth screen that answers "how am I actually
 doing" from the record rather than from a scoreboard. Every district
 writes what happened to an append-only security event log; this screen
@@ -178,8 +189,8 @@ component reaches for `localStorage` itself and progress survives a
 refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
-**Quality** — 310 tests across the rule, service, storage, navigation,
-feed and chart layers; lint, tests and build run on every pull request; zero axe-core
+**Quality** — 336 tests across the rule, service, storage, navigation,
+forensics, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
 accessibility violations on all five screens, verified in a real browser
 rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured

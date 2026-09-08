@@ -19,6 +19,7 @@ export const EVENT_TYPE = {
   THREAT_RESPONSE: 'threat-response',
   DEFENSE_TOGGLE: 'defense-toggle',
   INCIDENT_CLOSED: 'incident-closed',
+  FORENSICS_CLOSED: 'forensics-closed',
   MISSION_COMPLETED: 'mission-completed',
 }
 
@@ -138,6 +139,22 @@ export function defenseToggleEvent({ ruleId, on, activeCount }, options) {
 
 export function incidentClosedEvent({ caseId, outcome, seconds }, options) {
   return createEvent(EVENT_TYPE.INCIDENT_CLOSED, { caseId, outcome, seconds }, options)
+}
+
+/**
+ * A forensic case file submitted.
+ *
+ * Its own type rather than reusing incident-closed: a wrong conclusion
+ * is not an escalation, and squeezing it into that shape would have the
+ * analytics screen counting misidentified cases as cases handed to tier
+ * 2. Two different things deserve two names.
+ */
+export function forensicsClosedEvent({ caseId, correct, chainComplete }, options) {
+  return createEvent(
+    EVENT_TYPE.FORENSICS_CLOSED,
+    { caseId, correct: Boolean(correct), chainComplete: Boolean(chainComplete) },
+    options
+  )
 }
 
 export function missionCompletedEvent({ missionId }, options) {
