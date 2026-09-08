@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="CLOUDVERSE">
+  <rect width="32" height="32" rx="7" fill="#0A1024"/>
+  <!-- Core, with the three districts orbiting it -->
+  <circle cx="16" cy="16" r="4.2" fill="none" stroke="#00E5FF" stroke-width="2"/>
+  <circle cx="16" cy="5.6" r="2.5" fill="#3B82F6"/>
+  <circle cx="7"  cy="23" r="2.5" fill="#22E6A7"/>
+  <circle cx="25" cy="23" r="2.5" fill="#8B5CF6"/>
+  <g stroke="#1E293B" stroke-width="1.4">
+    <line x1="16" y1="11.8" x2="16" y2="8.1"/>
+    <line x1="12.7" y1="18.2" x2="9.2"  y2="21.4"/>
+    <line x1="19.3" y1="18.2" x2="22.8" y2="21.4"/>
+  </g>
+</svg>
