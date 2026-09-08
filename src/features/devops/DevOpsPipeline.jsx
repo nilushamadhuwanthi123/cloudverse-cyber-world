@@ -602,7 +602,7 @@ export default function DevOpsPipeline({ onBackToIntro }) {
       </header>
 
       {/* Main DevOps World Canvas */}
-      <main className="devops-district__canvas">
+      <section className="devops-district__canvas">
         {/* District Title & Deployment Highway Tag */}
         <header className="devops-district__header">
           <span className="devops-district__tag">Automated CI/CD Highway</span>
@@ -945,7 +945,7 @@ export default function DevOpsPipeline({ onBackToIntro }) {
             </footer>
           </aside>
         </div>
-      </main>
+      </section>
     </div>
   )
 }

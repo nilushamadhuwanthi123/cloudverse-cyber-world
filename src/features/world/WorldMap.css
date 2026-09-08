@@ -135,6 +135,9 @@
 }
 
 .world-map__hud-title {
+  /* This is the page's h1 now, so the browser's default heading margin
+     has to go -- it sits inside a flex HUD row, not a document flow. */
+  margin: 0;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   font-weight: 700;

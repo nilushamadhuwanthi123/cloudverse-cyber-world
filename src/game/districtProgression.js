@@ -9,6 +9,7 @@
  *
  * Pure JavaScript rule module (game/ layer).
  */
+import { INITIAL_WORLD_HEALTH } from './threatEngine'
 
 export const DISTRICT_STATUS = {
   LOCKED: 'locked',
@@ -45,6 +46,8 @@ export function evaluateDistrictStatus(districtId, progress = {}, overrides = {}
     : []
   const securityScore = typeof progress?.securityScore === 'number' ? progress.securityScore : 0
   const correctResponses = typeof progress?.correctResponses === 'number' ? progress.correctResponses : 0
+  const worldHealth =
+    typeof progress?.worldHealth === 'number' ? progress.worldHealth : INITIAL_WORLD_HEALTH
 
   switch (districtId) {
     case DISTRICT_IDS.CORE:
@@ -77,7 +80,16 @@ export function evaluateDistrictStatus(districtId, progress = {}, overrides = {}
       if (completedMissions.length > 0 || securityScore > 0 || correctResponses > 0) {
         return DISTRICT_STATUS.ACTIVE
       }
-      // Default initial state: locked until authorized or progression unlocked
+      // Working in Cloud or DevOps counts as the prior participation this
+      // gate is asking for. Those districts record their outcome as a
+      // change to world health and nothing else -- securityScore and
+      // correctResponses are only ever written inside Cyber itself, so
+      // gating solely on them left the district locked forever: the only
+      // way past the gate was to already be through it.
+      if (worldHealth !== INITIAL_WORLD_HEALTH) {
+        return DISTRICT_STATUS.AVAILABLE
+      }
+      // Nothing played yet -- Cloud is the way in.
       return DISTRICT_STATUS.LOCKED
     }
 

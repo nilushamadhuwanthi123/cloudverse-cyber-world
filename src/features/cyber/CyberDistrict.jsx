@@ -13,6 +13,7 @@ import {
   stopMotion,
 } from '../../lib/motion'
 import DefenseStatus from './components/DefenseStatus'
+import IncidentPanel from './components/IncidentPanel'
 import MissionPanel from './components/MissionPanel'
 import SeverityBadge from './components/SeverityBadge'
 import ThreatPanel from './components/ThreatPanel'
@@ -47,6 +48,9 @@ export default function CyberDistrict({ onExit }) {
   const [ruleStates, setRuleStates] = useState(allRulesOn)
   const [progress, setProgress] = useState(INITIAL_PROGRESS)
   const [justCompleted, setJustCompleted] = useState([])
+  // Containment decisions move exposure directly, so risk needs an input
+  // beyond health and rule states. Clamped so it can never invert the reading.
+  const [riskOffset, setRiskOffset] = useState(0)
 
   // Load once on mount. A failed or empty load leaves the fresh
   // defaults in place, so the district is always playable.
@@ -125,7 +129,11 @@ export default function CyberDistrict({ onExit }) {
   }, [])
 
   const missions = missionsWithStatus(progress)
-  const risk = assessRisk({ worldHealth, ruleStates })
+  const baseRisk = assessRisk({ worldHealth, ruleStates })
+  const risk = {
+    ...baseRisk,
+    value: Math.max(0, Math.min(100, baseRisk.value + riskOffset)),
+  }
 
   return (
     <section ref={rootRef} className="cyber-district" aria-labelledby="cyber-district-title">
@@ -218,6 +226,20 @@ export default function CyberDistrict({ onExit }) {
           <MissionPanel missions={missions} />
         </article>
       </div>
+
+      <section className="cyber-district__incident" aria-labelledby="incident-command-heading">
+        <h2 id="incident-command-heading" className="cyber-district__panel-heading">
+          Incident Command
+        </h2>
+        <IncidentPanel
+          worldHealth={worldHealth}
+          onRiskChange={(delta) => setRiskOffset((current) => current + delta)}
+          onIncidentResolved={({ appropriateContainment, rootCauseCorrect }) => {
+            // A clean response repays some world health; a poor one does not.
+            if (rootCauseCorrect && appropriateContainment) applyHealthDelta(5)
+          }}
+        />
+      </section>
 
       <button
         type="button"
