@@ -81,7 +81,7 @@
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wider);
   text-transform: uppercase;
-  color: var(--district-devops-primary);
+  color: var(--district-devops-text);
   background: var(--surface-2);
   border: 1px solid var(--district-devops-primary);
   border-radius: var(--radius-sm);
@@ -232,7 +232,7 @@
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   padding: var(--space-2) var(--space-3);
-  color: var(--district-devops-primary);
+  color: var(--district-devops-text);
   background: var(--surface-1);
   border: 1px solid var(--district-devops-primary);
   border-radius: var(--radius-sm);
@@ -818,7 +818,7 @@
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: var(--tracking-wider);
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .pipeline-node__name {
@@ -833,7 +833,7 @@
 .pipeline-node__title {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--district-devops-secondary);
+  color: var(--district-devops-text-secondary);
   letter-spacing: var(--tracking-wide);
   margin-bottom: var(--space-2);
 }
@@ -866,7 +866,7 @@
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: var(--tracking-wider);
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .pipeline-node__pulse-dot {
@@ -907,7 +907,7 @@
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: var(--tracking-wide);
-  color: var(--district-devops-primary);
+  color: var(--district-devops-text);
 }
 
 /* ------------------------------------------------------------
@@ -979,7 +979,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wider);
-  color: var(--district-devops-primary);
+  color: var(--district-devops-text);
   background: var(--surface-2);
   padding: 1px var(--space-2);
   border-radius: var(--radius-sm);
@@ -993,7 +993,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wider);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   background: var(--surface-1);
   padding: 1px var(--space-2);
   border-radius: var(--radius-sm);
@@ -1188,7 +1188,7 @@
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: var(--tracking-wide);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: uppercase;
 }
 

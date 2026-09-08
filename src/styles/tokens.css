@@ -73,6 +73,12 @@
   --district-cloud-secondary:  var(--cv-blue);
   --district-devops-primary:   var(--cv-violet);
   --district-devops-secondary: var(--cv-indigo);
+  /* Text-safe variants. The district colours above are chosen for borders,
+     glows and fills, where contrast rules do not apply. As body text on the
+     district's own background they measure 3.86-4.46:1, under the 4.5:1
+     minimum -- so text uses these lighter steps instead (6.33-6.94:1). */
+  --district-devops-text:           #A78BFA;
+  --district-devops-text-secondary: #818CF8;
   --district-cyber-primary:    var(--cv-cyan);
   --district-cyber-threat:     var(--cv-red);
   --district-cyber-advanced:   var(--cv-violet);
