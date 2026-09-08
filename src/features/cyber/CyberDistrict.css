@@ -390,3 +390,45 @@
   padding: 0;
   max-width: none;
 }
+
+/* ------------------------------------------------------------------ *
+ * Atmosphere (Phase 5).
+ *
+ * World health changes the district's own edge rather than only a
+ * number in the header, so a run going badly looks like it is going
+ * badly before the player reads anything. Deliberately restrained: a
+ * border tone and a faint top wash, no animation, nothing that moves on
+ * its own. An effect that never stops is a battery cost with no
+ * information in it, and this one carries information precisely because
+ * it changes only when world health crosses a band.
+ *
+ * The band is also written in words in the System Status panel, so the
+ * atmosphere is never the only thing saying it.
+ * ------------------------------------------------------------------ */
+
+.cyber-district {
+  border-top: 2px solid var(--status-stable);
+  transition: border-color var(--dur-slow) var(--ease-out);
+}
+
+.cyber-district[data-world-state='warning']  { border-top-color: var(--status-warning); }
+.cyber-district[data-world-state='critical'] { border-top-color: var(--sev-high); }
+.cyber-district[data-world-state='collapse'] { border-top-color: var(--status-critical); }
+
+.cyber-district[data-world-state='critical']::before,
+.cyber-district[data-world-state='collapse']::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 180px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 69, 103, 0.07), transparent);
+}
+
+.cyber-district { position: relative; }
+
+.cyber-district__panel--wide { grid-column: 1 / -1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cyber-district { transition: none !important; }
+}

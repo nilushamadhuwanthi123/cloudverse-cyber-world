@@ -1,0 +1,94 @@
+/*
+ * Security event feed.
+ *
+ * The tone colour on the left edge is a second signal only -- every line
+ * states its outcome in words ("Threat contained", "Defense rule
+ * disabled"), so the feed reads correctly in greyscale.
+ */
+
+.event-feed__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.event-feed__list:focus-visible {
+  outline: 2px solid var(--district-cyber-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.event-feed__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-2);
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.event-feed__item--good { border-left-color: var(--status-stable); }
+.event-feed__item--bad  { border-left-color: var(--status-critical); }
+.event-feed__item--warn { border-left-color: var(--status-warning); }
+.event-feed__item--info { border-left-color: var(--accent-primary); }
+
+.event-feed__tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.event-feed__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.event-feed__headline {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.event-feed__detail {
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.event-feed__when {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.event-feed--empty {
+  padding: var(--space-5);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+}
+
+.event-feed__empty-status {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-secondary);
+}
+
+.event-feed__empty-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}

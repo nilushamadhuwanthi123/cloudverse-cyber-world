@@ -67,6 +67,16 @@ response. `OFFLINE` is something that does not exist yet, and no amount
 of play will change that. Collapsing the two into one word is the kind of
 small dishonesty that makes a whole interface untrustworthy.
 
+Cyber Operations also carries a **System Status** readout and a **live
+security event feed**. Neither invents anything: the status bands come
+from the same `game/systemHealth.js` the World Map uses, and the feed is
+the same append-only log the Analytics sector derives its charts from,
+read newest first. When world health crosses a band the district's own
+edge changes with it, so a run going badly looks like it is going badly
+before you read a number.
+
+![Cyber Operations — system status and event feed](docs/screenshots/cyber-operations.png)
+
 Inside Cyber Operations, a threat runs a Detected → Analyzing → Active
 lifecycle, and the player picks one of three defense actions. The right
 one restores world health, a wrong one escalates, and every action
@@ -168,8 +178,8 @@ component reaches for `localStorage` itself and progress survives a
 refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
-**Quality** — 286 tests across the rule, service, storage, navigation
-and chart layers; lint, tests and build run on every pull request; zero axe-core
+**Quality** — 310 tests across the rule, service, storage, navigation,
+feed and chart layers; lint, tests and build run on every pull request; zero axe-core
 accessibility violations on all five screens, verified in a real browser
 rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured

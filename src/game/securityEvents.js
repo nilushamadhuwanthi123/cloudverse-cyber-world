@@ -36,6 +36,18 @@ const EVENT_TYPES = Object.values(EVENT_TYPE)
 export const MAX_EVENTS = 250
 
 /**
+ * Monotonic tie-breaker for ids.
+ *
+ * Two events can genuinely happen in the same millisecond -- one
+ * response can complete two missions at once -- and an id built from
+ * the timestamp alone then collides. React uses these as list keys, and
+ * duplicate keys make it render the same row twice and drop the other,
+ * which is exactly how it surfaced: a feed showing one mission's
+ * completion twice and hiding another's.
+ */
+let sequence = 0
+
+/**
  * Builds one event.
  *
  * `id` is injectable alongside `now` purely so tests can assert on a
@@ -43,8 +55,10 @@ export const MAX_EVENTS = 250
  */
 export function createEvent(type, detail = {}, { now = () => Date.now(), id } = {}) {
   const at = now()
+  sequence += 1
+
   return {
-    id: id ?? `${type}-${at}-${Math.round((at % 1000) + Object.keys(detail).length)}`,
+    id: id ?? `${type}-${at}-${sequence}`,
     type,
     at,
     ...detail,
