@@ -200,12 +200,25 @@ component reaches for `localStorage` itself and progress survives a
 refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
-**Quality** — 368 tests across the rule, service, storage, navigation,
-forensics, network, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
+**Quality** — 379 tests across the rule, service, storage, navigation,
+forensics, network, cursor, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
 accessibility violations on all five screens, verified in a real browser
 rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured
 and why the coverage line sits where it does.
+
+**The interface itself** — a custom cursor with six contextual states,
+because the interface already knows whether the next click inspects
+evidence, takes a scored action or does something destructive, and
+normally throws that away. It is never required: every state is also
+visible in the control itself, touch keeps the native cursor, and
+reduced motion drops the trail rather than speeding it up. Alongside it
+a shared surface language — bracketed panels, a conduit grid on surfaces
+that stand for space, one scan sweep when a live surface appears — so
+the Cyber sectors read as part of the same world as the World Map rather
+than as a card dashboard beside it. See [`docs/DESIGN.md`](docs/DESIGN.md).
+
+![Cyber Operations with the action cursor over a response](docs/screenshots/cyber-polish.png)
 
 ## Decisions worth explaining
 

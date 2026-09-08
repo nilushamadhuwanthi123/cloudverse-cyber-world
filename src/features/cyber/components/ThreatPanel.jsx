@@ -99,6 +99,7 @@ export default function ThreatPanel({ worldHealth, onHealthChange, onScoreChange
               key={action.id}
               type="button"
               className="threat-panel__action"
+              data-cursor="action"
               onClick={() => respond(action.id)}
             >
               {action.label}

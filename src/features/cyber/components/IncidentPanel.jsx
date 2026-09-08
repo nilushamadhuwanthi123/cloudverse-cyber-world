@@ -428,7 +428,12 @@ export default function IncidentPanel({
       {incident &&
         stage !== INCIDENT_STATE.RESOLVED &&
         stage !== INCIDENT_STATE.ESCALATED && (
-          <button type="button" className="incident-panel__escalate" onClick={escalate}>
+          <button
+            type="button"
+            className="incident-panel__escalate"
+            data-cursor="danger"
+            onClick={escalate}
+          >
             Escalate to tier 2
           </button>
         )}

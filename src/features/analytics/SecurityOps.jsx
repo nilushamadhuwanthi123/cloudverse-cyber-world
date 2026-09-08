@@ -106,6 +106,7 @@ export default function SecurityOps({ embedded = false, onBackToMap }) {
         <div className="ops__actions">
           <button
             type="button"
+            data-cursor={confirmingClear ? 'danger' : 'interactive'}
             className={`ops__clear ${confirmingClear ? 'ops__clear--armed' : ''}`}
             onClick={handleClear}
             disabled={!hasData}
@@ -169,7 +170,7 @@ export default function SecurityOps({ embedded = false, onBackToMap }) {
       </div>
 
       <div className="ops__grid">
-        <article className="ops-panel" aria-labelledby="ops-health-heading">
+        <article className="ops-panel cv-panel" aria-labelledby="ops-health-heading">
           <h3 id="ops-health-heading" className="ops-panel__heading">World health over time</h3>
           <p className="ops-panel__note">One reading per threat response.</p>
           <Sparkline
@@ -179,7 +180,7 @@ export default function SecurityOps({ embedded = false, onBackToMap }) {
           />
         </article>
 
-        <article className="ops-panel" aria-labelledby="ops-score-heading">
+        <article className="ops-panel cv-panel" aria-labelledby="ops-score-heading">
           <h3 id="ops-score-heading" className="ops-panel__heading">Security score over time</h3>
           <p className="ops-panel__note">Streak bonuses make good runs steepen.</p>
           <Sparkline
@@ -189,7 +190,7 @@ export default function SecurityOps({ embedded = false, onBackToMap }) {
           />
         </article>
 
-        <article className="ops-panel" aria-labelledby="ops-severity-heading">
+        <article className="ops-panel cv-panel" aria-labelledby="ops-severity-heading">
           <h3 id="ops-severity-heading" className="ops-panel__heading">Accuracy by severity</h3>
           <p className="ops-panel__note">
             Where the mistakes actually are, rather than one blended number.
@@ -197,7 +198,7 @@ export default function SecurityOps({ embedded = false, onBackToMap }) {
           <SeverityBars rows={data.bySeverity} />
         </article>
 
-        <article className="ops-panel" aria-labelledby="ops-outcome-heading">
+        <article className="ops-panel cv-panel" aria-labelledby="ops-outcome-heading">
           <h3 id="ops-outcome-heading" className="ops-panel__heading">Outcomes</h3>
           <p className="ops-panel__note">How responses and investigations ended.</p>
 
@@ -220,7 +221,7 @@ export default function SecurityOps({ embedded = false, onBackToMap }) {
           />
         </article>
 
-        <article className="ops-panel ops-panel--wide" aria-labelledby="ops-posture-heading">
+        <article className="ops-panel ops-panel--wide cv-panel" aria-labelledby="ops-posture-heading">
           <h3 id="ops-posture-heading" className="ops-panel__heading">Defensive posture</h3>
           <dl className="ops-facts">
             <div className="ops-facts__item">

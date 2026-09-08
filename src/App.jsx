@@ -4,6 +4,7 @@ import WorldMap from './features/world/WorldMap'
 import CyberDistrict from './features/cyber/CyberDistrict'
 import CloudDistrict from './features/cloud/CloudDistrict'
 import DevOpsPipeline from './features/devops/DevOpsPipeline'
+import CursorLayer from './components/CursorLayer'
 import './App.css'
 
 /**
@@ -28,6 +29,11 @@ export default function App() {
 
   return (
     <>
+      {/* Decoration over the whole app, and never in the way of it:
+          pointer-events none, absent on touch, and every state it shows
+          is also visible in the control itself. */}
+      <CursorLayer />
+
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>

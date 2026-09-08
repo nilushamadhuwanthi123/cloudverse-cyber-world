@@ -138,6 +138,7 @@ export default function DefenseStatus({ ruleStates, onToggleRule, onHealthChange
                 id={`switch-${rule.id}`}
                 aria-checked={isOn}
                 aria-label={`${rule.title || rule.label} — ${isOn ? 'ON' : 'OFF'}`}
+                data-cursor={isOn ? 'danger' : 'action'}
                 className={`defense-status__toggle defense-status__toggle--${isOn ? 'on' : 'off'}`}
                 onClick={() => handleToggle(rule.id)}
               >

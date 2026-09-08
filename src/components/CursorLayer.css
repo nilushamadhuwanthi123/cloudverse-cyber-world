@@ -1,0 +1,157 @@
+/*
+ * The CLOUDVERSE cursor.
+ *
+ * Every state is also visible in the element itself, so nothing here is
+ * load-bearing -- this is a second reading of information the page
+ * already shows. The layer never receives pointer events.
+ *
+ * The native cursor is hidden only while the layer is mounted, and the
+ * layer only mounts for a fine pointer. If the script never runs, the
+ * ordinary cursor is exactly where it was.
+ */
+
+.cursor {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  pointer-events: none;
+}
+
+.has-cloudverse-cursor,
+.has-cloudverse-cursor * {
+  cursor: none !important;
+}
+
+/*
+ * Text fields keep their caret. A ring is a worse pointer than an
+ * I-beam when the job is placing a cursor between two characters, and
+ * replacing it would be style costing function.
+ */
+.has-cloudverse-cursor input:not([type='button']):not([type='submit']):not([type='checkbox']):not([type='radio']),
+.has-cloudverse-cursor textarea,
+.has-cloudverse-cursor [contenteditable='true'] {
+  cursor: text !important;
+}
+
+.cursor__dot,
+.cursor__ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
+  border-radius: 999px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.cursor__dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: var(--district-cyber-primary);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.9);
+  transition: width var(--dur-fast) var(--ease-out),
+    height var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    margin var(--dur-fast) var(--ease-out);
+}
+
+.cursor__ring {
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 1px solid rgba(0, 229, 255, 0.55);
+  transition: width var(--dur-base) var(--ease-out),
+    height var(--dur-base) var(--ease-out),
+    margin var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    border-width var(--dur-base) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+/* Off the document entirely: nothing to point at. */
+.cursor__dot[data-away],
+.cursor__ring[data-away] { opacity: 0; }
+
+/* ---- states ---- */
+
+.cursor__ring[data-state='interactive'] {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-color: rgba(0, 229, 255, 0.9);
+}
+
+/* Inspect: a wider, thinner reticle -- a lens rather than a target. */
+.cursor__ring[data-state='inspect'] {
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border-color: rgba(59, 130, 246, 0.85);
+  border-style: dashed;
+}
+
+.cursor__dot[data-state='inspect'] { background: var(--accent-secondary); }
+
+/* Action: tighter and heavier. Something is about to be scored. */
+.cursor__ring[data-state='action'] {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-width: 2px;
+  border-color: var(--status-stable);
+}
+
+.cursor__dot[data-state='action'] {
+  background: var(--status-stable);
+  box-shadow: 0 0 10px rgba(34, 230, 167, 0.9);
+}
+
+.cursor__ring[data-state='danger'] {
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border-width: 2px;
+  border-color: var(--status-critical);
+}
+
+.cursor__dot[data-state='danger'] {
+  background: var(--status-critical);
+  box-shadow: 0 0 10px rgba(255, 69, 103, 0.9);
+}
+
+.cursor__ring[data-state='disabled'] {
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.cursor__dot[data-state='disabled'] {
+  background: var(--text-muted);
+  box-shadow: none;
+}
+
+/* Press: the ring closes on the dot. */
+.cursor__ring[data-pressed] {
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor__dot,
+  .cursor__ring {
+    transition: none !important;
+  }
+}
+
+/* Touch never gets here -- the layer does not mount for a coarse
+   pointer -- but if the media query and the script ever disagree, the
+   native cursor wins. */
+@media (pointer: coarse) {
+  .cursor { display: none; }
+  .has-cloudverse-cursor,
+  .has-cloudverse-cursor * { cursor: auto !important; }
+}

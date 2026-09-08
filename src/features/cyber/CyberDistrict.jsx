@@ -333,7 +333,7 @@ export default function CyberDistrict({ onExit }) {
           {activeSectorId === 'operations' && (
             <>
               <div className="cyber-district__grid">
-                <article className="cyber-district__panel" aria-labelledby="threat-severity-heading">
+                <article className="cyber-district__panel cv-panel" aria-labelledby="threat-severity-heading">
                   <h3 id="threat-severity-heading" className="cyber-district__panel-heading">
                     Threat Severity
                   </h3>
@@ -349,7 +349,7 @@ export default function CyberDistrict({ onExit }) {
                   </div>
                 </article>
 
-                <article className="cyber-district__panel" aria-labelledby="threat-monitor-heading">
+                <article className="cyber-district__panel cv-panel" aria-labelledby="threat-monitor-heading">
                   <h3 id="threat-monitor-heading" className="cyber-district__panel-heading">
                     Threat Monitor
                   </h3>
@@ -360,7 +360,7 @@ export default function CyberDistrict({ onExit }) {
                   />
                 </article>
 
-                <article className="cyber-district__panel" aria-labelledby="defense-status-heading">
+                <article className="cyber-district__panel cv-panel" aria-labelledby="defense-status-heading">
                   <h3 id="defense-status-heading" className="cyber-district__panel-heading">
                     Defense Status
                   </h3>
@@ -371,14 +371,14 @@ export default function CyberDistrict({ onExit }) {
                   />
                 </article>
 
-                <article className="cyber-district__panel" aria-labelledby="missions-heading">
+                <article className="cyber-district__panel cv-panel" aria-labelledby="missions-heading">
                   <h3 id="missions-heading" className="cyber-district__panel-heading">
                     Missions
                   </h3>
                   <MissionPanel missions={missions} />
                 </article>
 
-                <article className="cyber-district__panel" aria-labelledby="system-status-heading">
+                <article className="cyber-district__panel cv-panel" aria-labelledby="system-status-heading">
                   <h3 id="system-status-heading" className="cyber-district__panel-heading">
                     System Status
                   </h3>
@@ -386,7 +386,7 @@ export default function CyberDistrict({ onExit }) {
                 </article>
 
                 <article
-                  className="cyber-district__panel cyber-district__panel--wide"
+                  className="cyber-district__panel cyber-district__panel--wide cv-panel"
                   aria-labelledby="event-feed-heading"
                 >
                   <h3 id="event-feed-heading" className="cyber-district__panel-heading">
