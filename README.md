@@ -10,7 +10,7 @@ than a dashboard you read.
 > Cloud and DevOps — over a shared game layer, persistence and test
 > suite. The world map and the central Core are what remain.
 
-![Cyber District — Security Command](docs/screenshots/cyber-district.png)
+![Cyber District — Security Command](docs/screenshots/cyber-sectors.png)
 
 ## The loop
 
@@ -60,6 +60,12 @@ and Security Analytics. The other six are named, described and honestly
 marked as not deployed yet — a rail that called them "locked" would be
 telling the player to keep playing for something no amount of play will
 deliver. See [`docs/CYBER_SECTORS.md`](docs/CYBER_SECTORS.md).
+
+The rail in the screenshot above says what it means. `LOCKED` is
+something you earn — Incident Response opens on the first correct threat
+response. `OFFLINE` is something that does not exist yet, and no amount
+of play will change that. Collapsing the two into one word is the kind of
+small dishonesty that makes a whole interface untrustworthy.
 
 Inside Cyber Operations, a threat runs a Detected → Analyzing → Active
 lifecycle, and the player picks one of three defense actions. The right

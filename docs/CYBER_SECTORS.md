@@ -4,6 +4,8 @@ The Cyber District is organised as nine named sectors rather than one
 long scrolling page. This note explains how that navigation is put
 together and, more importantly, what it refuses to pretend.
 
+![Cyber District sector rail](screenshots/cyber-sectors.png)
+
 ## Three states, not two
 
 A sector is in exactly one of three states, and the distinction matters:
@@ -80,6 +82,8 @@ The rail is a real `tablist` with the behaviour the pattern promises:
   its tab and takes focus with a visible ring
 
 ## Entry sequence
+
+![Cyber District boot sequence](screenshots/cyber-boot.png)
 
 Entering the district plays four lines — secure channel, operations
 online, threat monitor, defense sync — and then reveals the interface.
