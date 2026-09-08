@@ -64,7 +64,9 @@ export default function ThreatPanel({ worldHealth, onHealthChange, onScoreChange
     const { threat: resolved, healthDelta } = resolveThreatResponse(threat, actionId)
     setThreat(resolved)
     onHealthChange(healthDelta)
-    onScoreChange(resolved.resolution.correct)
+    // Severity travels with the outcome so the operations log can break
+    // accuracy down by how hard the threat actually was.
+    onScoreChange(resolved.resolution.correct, resolved.severity)
   }
 
   function nextThreat() {
