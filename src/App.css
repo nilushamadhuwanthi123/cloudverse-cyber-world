@@ -39,10 +39,15 @@
   box-shadow: 0 0 8px var(--status-stable, #22e6a7);
 }
 
+/* Scrolls within itself on a narrow screen rather than widening the
+   page -- min-width:0 is what lets a flex item do that. */
 .district-nav__tabs {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
   background: rgba(5, 8, 22, 0.6);
   padding: 4px;
   border-radius: 8px;
