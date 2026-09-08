@@ -22,6 +22,7 @@ import {
   forensicsClosedEvent,
   incidentClosedEvent,
   missionCompletedEvent,
+  networkDecisionEvent,
   threatResponseEvent,
 } from '../../game/securityEvents'
 import {
@@ -38,6 +39,7 @@ import {
 } from '../../lib/motion'
 import SecurityOps from '../analytics/SecurityOps'
 import ForensicsBoard from './forensics/ForensicsBoard'
+import NetworkOperations from './network/NetworkOperations'
 import BootSequence from './components/BootSequence'
 import DefenseStatus from './components/DefenseStatus'
 import IncidentPanel from './components/IncidentPanel'
@@ -420,6 +422,15 @@ export default function CyberDistrict({ onExit }) {
               onCaseClosed={({ caseId, chainComplete, correct }) =>
                 record(forensicsClosedEvent({ caseId, correct, chainComplete }))
               }
+            />
+          )}
+
+          {activeSectorId === 'network' && (
+            <NetworkOperations
+              worldHealth={worldHealth}
+              ruleStates={ruleStates}
+              onHealthChange={applyHealthDelta}
+              onDecision={(decision) => record(networkDecisionEvent(decision))}
             />
           )}
 

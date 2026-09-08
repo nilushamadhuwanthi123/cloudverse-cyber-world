@@ -68,8 +68,8 @@ export const CYBER_SECTORS = Object.freeze([
     label: 'Network Operations',
     tagline: 'Nodes, traffic, packet inspection',
     summary:
-      'A live network view where traffic can be inspected and malicious flows blocked, feeding the threat engine directly.',
-    availability: SECTOR_AVAILABILITY.PLANNED,
+      'The district topology and the traffic crossing it. What arrives depends on world health and the perimeter — inspect a packet, weigh its signals, and decide whether to let it through.',
+    availability: SECTOR_AVAILABILITY.OPEN,
   }),
   Object.freeze({
     id: 'intelligence',
