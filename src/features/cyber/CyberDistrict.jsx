@@ -39,6 +39,7 @@ import {
 } from '../../lib/motion'
 import SecurityOps from '../analytics/SecurityOps'
 import ForensicsBoard from './forensics/ForensicsBoard'
+import IntelWorkspace from './intel/IntelWorkspace'
 import NetworkOperations from './network/NetworkOperations'
 import BootSequence from './components/BootSequence'
 import DefenseStatus from './components/DefenseStatus'
@@ -419,8 +420,8 @@ export default function CyberDistrict({ onExit }) {
 
           {activeSectorId === 'forensics' && (
             <ForensicsBoard
-              onCaseClosed={({ caseId, chainComplete, correct }) =>
-                record(forensicsClosedEvent({ caseId, correct, chainComplete }))
+              onCaseClosed={({ caseId, chainComplete, correct, indicators }) =>
+                record(forensicsClosedEvent({ caseId, correct, chainComplete, indicators }))
               }
             />
           )}
@@ -433,6 +434,8 @@ export default function CyberDistrict({ onExit }) {
               onDecision={(decision) => record(networkDecisionEvent(decision))}
             />
           )}
+
+          {activeSectorId === 'intelligence' && <IntelWorkspace events={feed} />}
 
           {activeSectorId === 'analytics' && <SecurityOps embedded />}
         </div>

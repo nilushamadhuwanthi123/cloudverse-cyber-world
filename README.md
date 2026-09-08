@@ -158,6 +158,17 @@ with the reason, because "these two share nothing" is a finding. See
 
 ![The evidence board with an attack chain traced](docs/screenshots/forensics-board.png)
 
+**Security Intelligence** — indicators correlated through to an actor, a
+campaign and its patterns. The indicators are the same strings the
+forensic cases and network traffic already use, which is what makes this
+a live sector rather than an encyclopaedia: flag one while closing a
+case and it comes back marked *seen · DF-001*, with the case named. An
+indicator you found that the sector has nothing on is kept and labelled
+as exactly that, because "you found something we have nothing on" is a
+real result.
+
+![Security Intelligence correlating a flagged indicator](docs/screenshots/intel.png)
+
 **Network Operations** — the district topology and the traffic crossing
 it. What arrives depends on the world: a healthy district with its
 perimeter intact sees mostly ordinary traffic, and the share worth
@@ -200,8 +211,8 @@ component reaches for `localStorage` itself and progress survives a
 refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
-**Quality** — 379 tests across the rule, service, storage, navigation,
-forensics, network, cursor, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
+**Quality** — 397 tests across the rule, service, storage, navigation,
+forensics, network, intelligence, cursor, feed and chart layers; lint, tests and build run on every pull request; zero axe-core
 accessibility violations on all five screens, verified in a real browser
 rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured

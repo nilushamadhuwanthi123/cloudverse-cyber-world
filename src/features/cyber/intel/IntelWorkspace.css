@@ -1,0 +1,219 @@
+/*
+ * Security Intelligence.
+ *
+ * The chain reads top to bottom as four stages with connectors between
+ * them. The connectors are aria-hidden and purely visual: the stages are
+ * headings and lists, so the reading order already carries the sequence.
+ *
+ * "Seen in this run" is stated in words on every row it applies to. The
+ * colour is the second signal.
+ */
+
+.intel__readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+}
+
+.intel__readouts strong { color: var(--text-primary); }
+.intel__readout-note { color: var(--text-secondary); }
+
+.intel__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.intel__column-title,
+.intel__stage-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-base);
+}
+
+.intel__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.intel__indicator {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-3);
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 2px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.intel__indicator:hover { border-color: var(--border-active); }
+.intel__indicator--selected { border-color: var(--district-cyber-primary); }
+.intel__indicator--seen { border-left-color: var(--status-stable); }
+
+.intel__indicator-kind {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.intel__indicator-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.intel__indicator-state {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.intel__indicator--seen .intel__indicator-state { color: var(--status-stable); }
+
+/* ---- the chain ---- */
+
+.intel__chain {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.intel__stage {
+  padding: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.intel__stage-step {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  color: var(--district-cyber-primary);
+}
+
+.intel__stage-note,
+.intel__empty {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.intel__stage-note strong { color: var(--text-primary); }
+
+/* The connector between stages: a short lit run. Decoration only. */
+.intel__link {
+  width: 1px;
+  height: var(--space-5);
+  margin-left: var(--space-6);
+  background: linear-gradient(
+    to bottom,
+    var(--district-cyber-primary),
+    rgba(0, 229, 255, 0.15)
+  );
+}
+
+.intel__cards,
+.intel__patterns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.intel__card,
+.intel__pattern {
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border-left: 2px solid var(--district-cyber-primary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.intel__pattern { border-left-color: var(--accent-advanced); }
+
+.intel__codename,
+.intel__pattern-name {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+}
+
+.intel__card-text {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.intel__facts { display: grid; gap: var(--space-2); margin: 0; }
+
+.intel__facts > div {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.intel__facts dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.intel__facts dd { margin: 0; color: var(--text-primary); }
+
+.intel__tell {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  background: rgba(139, 92, 246, 0.08);
+  border-radius: var(--radius-sm);
+}
+
+.intel__tell-label {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--district-devops-text);
+}
+
+@media (min-width: 900px) {
+  .intel__layout { grid-template-columns: minmax(15rem, 20rem) 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intel__indicator { transition: none !important; }
+}
