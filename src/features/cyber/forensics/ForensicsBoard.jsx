@@ -150,7 +150,7 @@ export default function ForensicsBoard({ onCaseClosed }) {
       </div>
 
       <div className="forensics__layout">
-        <div className="forensics__board">
+        <div className="forensics__board cv-grid cv-live">
           {/* Decoration only: every traced connection is also written out
               in the list below, so nothing here is load-bearing. */}
           <svg
@@ -193,6 +193,7 @@ export default function ForensicsBoard({ onCaseClosed }) {
                 >
                   <button
                     type="button"
+                    data-cursor={tracing ? 'action' : 'inspect'}
                     className={`forensics__node ${isSelected ? 'forensics__node--selected' : ''} ${
                       isSource ? 'forensics__node--source' : ''
                     } ${connected ? 'forensics__node--linked' : ''}`}
@@ -210,7 +211,7 @@ export default function ForensicsBoard({ onCaseClosed }) {
           </ul>
         </div>
 
-        <aside className="forensics__inspector" aria-label="Evidence inspector">
+        <aside className="forensics__inspector cv-panel" aria-label="Evidence inspector">
           {!selected ? (
             <p className="forensics__empty">
               Select a record to inspect it. Two records can be traced to each other
@@ -234,6 +235,7 @@ export default function ForensicsBoard({ onCaseClosed }) {
               <button
                 type="button"
                 className="forensics__action"
+                data-cursor="action"
                 onClick={startTrace}
                 disabled={tracing}
               >
@@ -325,6 +327,7 @@ export default function ForensicsBoard({ onCaseClosed }) {
                   <button
                     type="button"
                     className="forensics__option"
+                    data-cursor="action"
                     onClick={() => submit(option.id)}
                   >
                     {option.label}

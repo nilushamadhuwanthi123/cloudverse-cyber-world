@@ -135,7 +135,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
         </span>
       </div>
 
-      <div className="netops__map">
+      <div className="netops__map cv-grid cv-live">
         {/* Decoration: every link is also stated in the node inspector. */}
         <svg
           className="netops__links"
@@ -174,6 +174,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
               >
                 <button
                   type="button"
+                  data-cursor="inspect"
                   className={`netops__node netops__node--${node.kind} ${
                     node.id === selectedNodeId ? 'netops__node--selected' : ''
                   } ${onPath ? 'netops__node--on-path' : ''}`}
@@ -192,7 +193,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
       </div>
 
       {selectedNode && (
-        <section className="netops__panel" aria-labelledby="netops-node-heading">
+        <section className="netops__panel cv-panel" aria-labelledby="netops-node-heading">
           <h3 id="netops-node-heading" className="netops__panel-title">
             {selectedNode.label}
           </h3>
@@ -218,7 +219,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
         </section>
       )}
 
-      <section className="netops__panel" aria-labelledby="netops-queue-heading">
+      <section className="netops__panel cv-panel" aria-labelledby="netops-queue-heading">
         <h3 id="netops-queue-heading" className="netops__panel-title">
           Captured traffic
         </h3>
@@ -240,6 +241,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
               <li key={packet.id}>
                 <button
                   type="button"
+                  data-cursor="inspect"
                   className={`netops__packet netops__packet--${packet.state} ${
                     packet.id === selectedPacketId ? 'netops__packet--selected' : ''
                   }`}
@@ -263,7 +265,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
       </section>
 
       {selectedPacket && (
-        <section className="netops__panel" aria-labelledby="netops-packet-heading">
+        <section className="netops__panel cv-panel" aria-labelledby="netops-packet-heading">
           <h3 id="netops-packet-heading" className="netops__panel-title">
             {selectedPacket.summary}
           </h3>
@@ -285,6 +287,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
             <button
               type="button"
               className="netops__action netops__action--block"
+              data-cursor="danger"
               onClick={() => decide(PACKET_ACTION.BLOCK)}
             >
               Block
@@ -292,6 +295,7 @@ export default function NetworkOperations({ worldHealth, ruleStates, onHealthCha
             <button
               type="button"
               className="netops__action netops__action--allow"
+              data-cursor="action"
               onClick={() => decide(PACKET_ACTION.ALLOW)}
             >
               Allow

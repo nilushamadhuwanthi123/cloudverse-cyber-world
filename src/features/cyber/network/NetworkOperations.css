@@ -273,10 +273,6 @@
     background: var(--surface-1);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    background-image:
-      linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
   }
 
   .netops__links {

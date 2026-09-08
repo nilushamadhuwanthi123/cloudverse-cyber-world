@@ -1,0 +1,161 @@
+/*
+ * The HUD layer.
+ *
+ * A shared surface language, so the Cyber sectors read as part of the
+ * same world as the World Map rather than as a card dashboard sitting
+ * next to it. Three classes, composed onto existing panels:
+ *
+ *   .cv-panel  corner brackets and a lit top edge
+ *   .cv-grid   the conduit grid, for surfaces that represent space
+ *   .cv-live   a single scan sweep when a live surface appears
+ *
+ * Everything here is decoration in the strict sense: remove this file
+ * and every screen still states its information in text, keeps its
+ * contrast, and works by keyboard. Nothing below carries meaning on its
+ * own, which is why none of it is tested for behaviour -- only for not
+ * getting in the way.
+ *
+ * No infinite ambient animation. The one sweep runs once when a surface
+ * mounts and then stops; a loop that never ends is a battery cost with
+ * no information in it.
+ */
+
+/* ---- app backdrop ---- */
+
+/*
+ * A faint conduit field behind everything, brightest at the top where
+ * the eye lands first. Fixed, so it does not scroll with content and
+ * cannot add to the document height.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(0, 229, 255, 0.10), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 15% 110%, rgba(139, 92, 246, 0.07), transparent 70%),
+    linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+}
+
+/* ---- bracketed panel ---- */
+
+.cv-panel {
+  position: relative;
+}
+
+/*
+ * Corner brackets: two elements, four corners, drawn with borders on
+ * opposite sides of each. Cheaper than an image and it scales with the
+ * radius token instead of fighting it.
+ */
+.cv-panel::before,
+.cv-panel::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  border-color: var(--district-cyber-primary);
+  opacity: 0.55;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.cv-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+  border-top-left-radius: var(--radius-lg);
+}
+
+.cv-panel::after {
+  right: -1px;
+  bottom: -1px;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+.cv-panel:hover::before,
+.cv-panel:hover::after,
+.cv-panel:focus-within::before,
+.cv-panel:focus-within::after {
+  opacity: 1;
+}
+
+/* ---- conduit grid ---- */
+
+/*
+ * For surfaces that stand for space rather than for text: the evidence
+ * board, the network map. The grid gives a sense of extent, and the
+ * mask fades it at the edges so it reads as depth rather than as
+ * wallpaper.
+ */
+.cv-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, #000 55%, transparent 100%);
+}
+
+/* ---- one scan sweep ---- */
+
+.cv-live {
+  position: relative;
+  overflow: hidden;
+}
+
+.cv-live::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 40%;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 229, 255, 0.09),
+    transparent
+  );
+  transform: translateY(-100%);
+  animation: cvScan 1100ms var(--ease-out) 1 both;
+}
+
+@keyframes cvScan {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(320%); }
+}
+
+/*
+ * Reduced motion: the sweep does not play faster, it does not play. The
+ * brackets and the grid stay, because neither of them moves.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .cv-live::after { display: none; }
+  .cv-panel::before,
+  .cv-panel::after { transition: none; }
+}
+
+/* ---- press feedback ---- */
+
+/*
+ * One rule for every control in the app: a press moves. It is the
+ * smallest possible confirmation that a click landed, and it costs
+ * nothing -- no per-component work, no extra markup.
+ *
+ * Deliberately not a scale: scaling a button nudges the text inside it
+ * and makes a crisp label look soft for the length of the press.
+ */
+button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled):active { transform: none; }
+}
