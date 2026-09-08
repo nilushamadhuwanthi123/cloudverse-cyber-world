@@ -68,6 +68,37 @@ an explorable environment.
 
 ![Cloud District](docs/screenshots/cloud-district.png)
 
+### One frame, every system reacting
+
+![Security Command with four systems interacting](docs/screenshots/systems-in-play.png)
+
+That is one screenshot, not a composite, and most of what the project
+does is visible in it:
+
+- **Security Score 52 with a `4x streak`** — four correct responses in a
+  row, each worth more than the last, because steady judgement should
+  beat a lucky guess between mistakes.
+- **Risk 18, amber** — two firewall rules were switched off moments
+  before. Risk is derived from present exposure, so it moved the instant
+  they did, and it will drop the instant they go back on.
+- **Two rules showing `OFF` in red** while world health quietly drains
+  for as long as they stay that way.
+- **Missions: three complete, one in progress** — an unlock chain, not a
+  checklist. *Full Perimeter* is still open because it asks for five
+  correct responses **with every defense on**, and two are off.
+- **`Mission complete: Hold the Line`** announced in a live region, so
+  the change is heard as well as seen.
+
+Nothing there is a static mock: each panel is reading shared district
+state that the others are changing.
+
+<details>
+<summary>The same district at 390px</summary>
+
+![Cyber District on mobile](docs/screenshots/mobile.png)
+
+</details>
+
 **The layer underneath both** — `game/` holds the rules (threat
 lifecycle, severity, security score with a streak bonus, mission unlock
 order, and a risk reading derived from current exposure rather than
