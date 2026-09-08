@@ -6,9 +6,9 @@ than a dashboard you read.
 
 [![CI](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml/badge.svg)](https://github.com/nilushamadhuwanthi123/cloudverse-cyber-world/actions/workflows/ci.yml)
 
-> **Status: in development.** Two of the three districts are playable —
-> Cyber and Cloud — with the shared game layer, persistence and test
-> suite behind them. The world map, DevOps district and Core are next.
+> **Status: in development.** All three districts are playable — Cyber,
+> Cloud and DevOps — over a shared game layer, persistence and test
+> suite. The world map and the central Core are what remain.
 
 ![Cyber District — Security Command](docs/screenshots/cyber-district.png)
 
@@ -64,9 +64,14 @@ health drain for as long as it stays off, and a mission chain that
 unlocks in order and survives a page refresh.
 
 **Cloud District** — compute, storage and database locations rendered as
-an explorable environment.
+an explorable environment, each able to raise a simulated incident whose
+response moves world health.
 
 ![Cloud District](docs/screenshots/cloud-district.png)
+
+**DevOps District** — a six-stage delivery pipeline (code → build → test
+→ package → deploy → live), each stage opening its own detail view, with
+scenario drills that push a failure through it.
 
 ### One frame, every system reacting
 
@@ -99,7 +104,26 @@ state that the others are changing.
 
 </details>
 
-**The layer underneath both** — `game/` holds the rules (threat
+**Incident Command** — the Cyber district's long-form investigation. A
+case opens, you read a timeline of evidence and pick out the records that
+belong to the attack chain, name a root cause, and choose a containment
+action knowing it costs something: isolating a server ends the exposure
+and takes the service off the air with it. The stages are gated on
+purpose — containment options do not appear until a root cause is named,
+because choosing a response before you know what happened is the mistake
+the exercise exists to prevent. See
+[`docs/INCIDENT_RESPONSE.md`](docs/INCIDENT_RESPONSE.md).
+
+![Incident Command mid-investigation](docs/screenshots/incident-command.png)
+
+The evidence above has been submitted, so each record now carries its
+verdict. Four belong to the attack chain — a build finishing, its stored
+checksum changing, the deployment picking up the stored copy, and the new
+outbound connection that followed. One is ordinary background noise a
+running system produces at the same time, and selecting it is marked as
+such. No single line proves anything; the order does.
+
+**The layer underneath all three** — `game/` holds the rules (threat
 lifecycle, severity, security score with a streak bonus, mission unlock
 order, and a risk reading derived from current exposure rather than
 accumulated). `services/` is the async seam over `storage/`, so no
@@ -188,8 +212,9 @@ reasoning, including where state lives and why.
 ```
 src/
 ├── features/
-│   ├── cyber/      threat panel, defense status, missions, severity badges
+│   ├── cyber/      threat panel, defense status, incident command, missions
 │   ├── cloud/      compute, storage and database locations
+│   ├── devops/     the delivery pipeline and its scenario drills
 │   └── intro/      the entry sequence
 ├── game/           the rules — framework-free, no JSX or DOM
 │   ├── threatEngine.js      lifecycle, generation, response resolution
@@ -206,7 +231,7 @@ src/
 ```
 
 `app/` and `components/` exist as placeholders with a README each; the
-DevOps district and the Core are not built yet. Every folder carries a
+central Core is not built yet. Every folder carries a
 short `README.md` explaining what belongs in it — useful when two people
 are adding files to the same tree.
 
@@ -257,14 +282,15 @@ was verified fixed in a browser before approval.
 | Setup · Visual foundation · Intro | done |
 | Cyber district | done |
 | Cloud district | done |
+| DevOps district | done |
+| Incident response · Digital forensics | done — lifecycle, evidence correlation, containment trade-offs |
 | Game mechanics · Unlocks | done — scoring, missions, unlock order |
-| Responsive · Accessibility & performance | done — zero axe violations |
-| Testing | done — 77 tests, CI on every PR |
-| Documentation | architecture, testing and accessibility docs written |
+| Responsive · Accessibility & performance | done — zero axe violations on all three districts |
+| Testing | done — 158 tests, CI on every PR |
+| Production build · Deployment | done — published to GitHub Pages on every push to main |
+| Documentation | architecture, testing, accessibility and incident-response docs |
 | World map | next — a district switcher stands in for now |
-| DevOps district | next |
-| Event engine · Core · Advanced features | not started |
-| Production build · Deployment | build is clean; not deployed yet |
+| Event engine · Core | not started |
 
 ## Disclaimer
 
