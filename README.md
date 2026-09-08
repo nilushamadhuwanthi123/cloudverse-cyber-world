@@ -123,6 +123,29 @@ outbound connection that followed. One is ordinary background noise a
 running system produces at the same time, and selecting it is marked as
 such. No single line proves anything; the order does.
 
+**Operations Center** — a fifth screen that answers "how am I actually
+doing" from the record rather than from a scoreboard. Every district
+writes what happened to an append-only security event log; this screen
+derives all of it back out — response accuracy overall and broken down by
+severity, world health and security score plotted over the run, how
+investigations ended, and how exposed the defenses ever got. Nothing is
+stored as its own total, so any number on the screen can be traced to the
+events that produced it, and a chart nobody thought of when the log was
+written can still be built from history that already exists. The charts
+are hand-written SVG — no charting dependency — and each ships as both a
+picture and a screen-reader table, because a line with an `aria-label`
+alone tells a non-sighted reader the shape and withholds the numbers. See
+[`docs/SECURITY_ANALYTICS.md`](docs/SECURITY_ANALYTICS.md).
+
+![Operations Center](docs/screenshots/operations-center.png)
+
+Escalation is a real outcome here, not a failure state. The lifecycle
+engine had always allowed handing a case to tier 2 from any stage, and
+nothing in the UI reached that transition until this screen needed
+somewhere to count it — a responder who cannot tell when a case is beyond
+them is a worse responder, so the button exists and the log records it as
+its own outcome rather than as a loss.
+
 **The layer underneath all three** — `game/` holds the rules (threat
 lifecycle, severity, security score with a streak bonus, mission unlock
 order, and a risk reading derived from current exposure rather than
@@ -131,10 +154,10 @@ component reaches for `localStorage` itself and progress survives a
 refresh — including when storage is unavailable, out of quota, or holds
 JSON an older build wrote.
 
-**Quality** — 77 tests across the rule, service and storage layers; lint,
-tests and build run on every pull request; zero axe-core accessibility
-violations on both districts, verified in a real browser rather than by
-eye. See [`docs/TESTING.md`](docs/TESTING.md) and
+**Quality** — 265 tests across the rule, service, storage and chart
+layers; lint, tests and build run on every pull request; zero axe-core
+accessibility violations on all five screens, verified in a real browser
+rather than by eye. See [`docs/TESTING.md`](docs/TESTING.md) and
 [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md) for what was measured
 and why the coverage line sits where it does.
 
@@ -215,19 +238,23 @@ src/
 │   ├── cyber/      threat panel, defense status, incident command, missions
 │   ├── cloud/      compute, storage and database locations
 │   ├── devops/     the delivery pipeline and its scenario drills
+│   ├── analytics/  the Operations Center and its SVG charts
 │   └── intro/      the entry sequence
 ├── game/           the rules — framework-free, no JSX or DOM
-│   ├── threatEngine.js      lifecycle, generation, response resolution
-│   ├── threatTypes.js       threat catalogue and severity
-│   ├── defenseRules.js      firewall rule catalogue
-│   ├── securityScore.js     scoring and streak bonus
-│   ├── riskScore.js         current exposure, derived
-│   └── missionState.js      unlock order and completion
-├── data/           content: mission definitions
+│   ├── threatEngine.js       lifecycle, generation, response resolution
+│   ├── threatTypes.js        threat catalogue and severity
+│   ├── defenseRules.js       firewall rule catalogue
+│   ├── securityScore.js      scoring and streak bonus
+│   ├── riskScore.js          current exposure, derived
+│   ├── missionState.js       unlock order and completion
+│   ├── incidentResponse.js   investigation lifecycle
+│   ├── securityEvents.js     the append-only event log
+│   └── securityAnalytics.js  every reading, derived from that log
+├── data/           content: mission definitions, incident cases
 ├── services/       the async seam over storage
 ├── storage/        localStorage adapter
 ├── styles/         design tokens and global styles
-└── lib/            motion helper over anime.js
+└── lib/            motion helper over anime.js, chart geometry
 ```
 
 `app/` and `components/` exist as placeholders with a README each; the

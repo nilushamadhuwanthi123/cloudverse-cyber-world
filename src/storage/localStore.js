@@ -15,6 +15,7 @@ const KEY_PREFIX = 'cloudverse:'
 
 export const STORAGE_KEYS = {
   PROGRESS: `${KEY_PREFIX}progress`,
+  EVENTS: `${KEY_PREFIX}events`,
 }
 
 /**

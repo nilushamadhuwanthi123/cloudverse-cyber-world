@@ -56,7 +56,17 @@ const STAGE_ORDER = [
   INCIDENT_STATE.RESOLVED,
 ]
 
-export default function IncidentPanel({ worldHealth, onRiskChange, onIncidentResolved }) {
+/** Whole seconds an incident was open, from its own recorded history. */
+function elapsedSeconds(incident) {
+  return Math.round(responseTimeline(incident).totalMs / 1000)
+}
+
+export default function IncidentPanel({
+  worldHealth,
+  onRiskChange,
+  onIncidentResolved,
+  onIncidentEscalated,
+}) {
   const rootRef = useRef(null)
   const animRef = useRef(null)
 
@@ -146,11 +156,36 @@ export default function IncidentPanel({ worldHealth, onRiskChange, onIncidentRes
     setIncident(done.incident)
     onIncidentResolved?.({
       caseId: incidentCase.caseId,
+      outcome: 'resolved',
+      seconds: elapsedSeconds(done.incident),
       accurate: findings?.complete === true,
       rootCauseCorrect: rootCauseResult?.correct === true,
       appropriateContainment: containmentResult?.appropriate === true,
     })
     setNotice('Incident resolved.')
+  }
+
+  /**
+   * Hand the incident to tier 2 and stop working it.
+   *
+   * The lifecycle engine has always allowed this from every stage --
+   * escalating is a legitimate outcome, not a failure state, and a
+   * responder who cannot tell when a case is beyond them is a worse
+   * responder. Nothing in the UI reached that transition until now.
+   */
+  function escalate() {
+    const done = transitionIncident(incident, INCIDENT_STATE.ESCALATED, {
+      note: 'Handed to tier 2',
+    })
+    if (!done.ok) return
+    setIncident(done.incident)
+    onIncidentEscalated?.({
+      caseId: incidentCase.caseId,
+      outcome: 'escalated',
+      seconds: elapsedSeconds(done.incident),
+      stage: incident.state,
+    })
+    setNotice(`Incident ${incidentCase.caseId} escalated to tier 2.`)
   }
 
   function nextIncident() {
@@ -385,6 +420,33 @@ export default function IncidentPanel({ worldHealth, onRiskChange, onIncidentRes
         <button type="button" className="incident-panel__primary" onClick={finish}>
           Close the incident
         </button>
+      )}
+
+      {/* Escalation is available from any open stage, matching what the
+          lifecycle engine allows. Kept visually secondary so it reads as
+          the deliberate choice it is rather than the obvious next click. */}
+      {incident &&
+        stage !== INCIDENT_STATE.RESOLVED &&
+        stage !== INCIDENT_STATE.ESCALATED && (
+          <button type="button" className="incident-panel__escalate" onClick={escalate}>
+            Escalate to tier 2
+          </button>
+        )}
+
+      {stage === INCIDENT_STATE.ESCALATED && (
+        <div className="incident-panel__postmortem">
+          <h4 className="incident-panel__block-title">Escalated</h4>
+          <p className="incident-panel__escalated-note">
+            {incidentCase.caseId} was handed to tier 2 after{' '}
+            {responseTimeline(incident).stages.length} recorded stage
+            {responseTimeline(incident).stages.length === 1 ? '' : 's'}. Nothing
+            is scored for an escalation — it is recorded in the operations log
+            as its own outcome.
+          </p>
+          <button type="button" className="incident-panel__primary" onClick={nextIncident}>
+            Next incident
+          </button>
+        </div>
       )}
 
       {stage === INCIDENT_STATE.RESOLVED && (

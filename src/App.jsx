@@ -4,6 +4,7 @@ import WorldMap from './features/world/WorldMap'
 import CyberDistrict from './features/cyber/CyberDistrict'
 import CloudDistrict from './features/cloud/CloudDistrict'
 import DevOpsPipeline from './features/devops/DevOpsPipeline'
+import SecurityOps from './features/analytics/SecurityOps'
 import './App.css'
 
 /**
@@ -14,7 +15,7 @@ import './App.css'
  */
 export default function App() {
   const [entered, setEntered] = useState(false)
-  const [view, setView] = useState('map') // 'map' | 'cloud' | 'devops' | 'cyber'
+  const [view, setView] = useState('map') // 'map' | 'cloud' | 'devops' | 'cyber' | 'ops'
 
   const handleEnterWorld = () => {
     setEntered(true)
@@ -86,6 +87,17 @@ export default function App() {
             >
               🛡️ Cyber District
             </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-ops"
+              aria-selected={view === 'ops'}
+              aria-controls="main-content"
+              className={`district-nav__tab ${view === 'ops' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setView('ops')}
+            >
+              📊 Operations Center
+            </button>
           </div>
 
           <button
@@ -118,6 +130,8 @@ export default function App() {
             onBackToMap={() => setView('map')}
             onNavigateToCloud={() => setView('cloud')}
           />
+        ) : view === 'ops' ? (
+          <SecurityOps onBackToMap={() => setView('map')} />
         ) : (
           <CyberDistrict onExit={() => setView('map')} />
         )}

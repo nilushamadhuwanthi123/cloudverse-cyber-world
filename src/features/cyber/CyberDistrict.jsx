@@ -1,11 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { stagger } from 'animejs'
-import { allRulesActive, getInitialRuleStates } from '../../game/defenseRules'
+import {
+  allRulesActive,
+  getActiveRulesCount,
+  getInitialRuleStates,
+} from '../../game/defenseRules'
 import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
 import { applyResponseToScore, INITIAL_SECURITY_SCORE_STATE } from '../../game/securityScore'
 import { INITIAL_PROGRESS, missionsWithStatus, recordResponse } from '../../game/missionState'
 import { assessRisk } from '../../game/riskScore'
-import { loadProgress, saveProgress } from '../../services/progressService'
+import {
+  appendEvent,
+  defenseToggleEvent,
+  incidentClosedEvent,
+  missionCompletedEvent,
+  threatResponseEvent,
+} from '../../game/securityEvents'
+import {
+  loadEvents,
+  loadProgress,
+  saveEvents,
+  saveProgress,
+} from '../../services/progressService'
 import {
   motionTimeline,
   prefersReducedMotion,
@@ -49,6 +65,13 @@ export default function CyberDistrict({ onExit }) {
   // Containment decisions move exposure directly, so risk needs an input
   // beyond health and rule states. Clamped so it can never invert the reading.
   const [riskOffset, setRiskOffset] = useState(0)
+  // The security event log. Appended to here and read by the Operations
+  // Center; this district never reads it back to make a decision, so a
+  // failed write costs analytics and nothing else. Held in a ref rather
+  // than state because nothing on this screen renders it -- and because
+  // appending is a side effect, which must not live inside a state
+  // updater that React is free to run more than once.
+  const eventsRef = useRef([])
 
   // Load once on mount. A failed or empty load leaves the fresh
   // defaults in place, so the district is always playable.
@@ -60,6 +83,9 @@ export default function CyberDistrict({ onExit }) {
       setScoreState({ score: saved.securityScore, streak: 0 })
       setWorldHealth(saved.worldHealth)
     })
+    loadEvents().then((saved) => {
+      if (!cancelled) eventsRef.current = saved
+    })
     return () => {
       cancelled = true
     }
@@ -69,9 +95,33 @@ export default function CyberDistrict({ onExit }) {
     setWorldHealth((current) => clampWorldHealth(current + delta))
   }, [])
 
-  const toggleRule = useCallback((ruleId) => {
-    setRuleStates((current) => ({ ...current, [ruleId]: !current[ruleId] }))
+  /**
+   * Appends one event and persists the log.
+   *
+   * Reads and writes the ref so several events recorded in the same tick
+   * each build on the previous one -- a mission completing at the same
+   * moment as the response that completed it must not be written over by
+   * a log that never saw it.
+   */
+  const record = useCallback((event) => {
+    eventsRef.current = appendEvent(eventsRef.current, event)
+    saveEvents(eventsRef.current)
   }, [])
+
+  const toggleRule = useCallback(
+    (ruleId) => {
+      const next = { ...ruleStates, [ruleId]: !ruleStates[ruleId] }
+      setRuleStates(next)
+      record(
+        defenseToggleEvent({
+          ruleId,
+          on: next[ruleId],
+          activeCount: getActiveRulesCount(next),
+        })
+      )
+    },
+    [record, ruleStates]
+  )
 
   /**
    * One resolved threat: score it, fold it into mission progress, and
@@ -80,24 +130,38 @@ export default function CyberDistrict({ onExit }) {
    * one the missions should be judged against.
    */
   const handleResponse = useCallback(
-    (correct) => {
+    (correct, severity) => {
       const nextScore = applyResponseToScore(scoreState, correct)
       setScoreState(nextScore)
 
       const health = clampWorldHealth(worldHealth + (correct ? 5 : -10))
+      const allDefensesOn = allRulesActive(ruleStates)
       const { progress: nextProgress, newlyCompleted } = recordResponse(progress, {
         correct,
         streak: nextScore.streak,
         securityScore: nextScore.score,
         worldHealth: health,
-        allDefensesOn: allRulesActive(ruleStates),
+        allDefensesOn,
       })
 
       setProgress(nextProgress)
       if (newlyCompleted.length > 0) setJustCompleted(newlyCompleted)
       saveProgress(nextProgress)
+
+      record(
+        threatResponseEvent({
+          severity,
+          correct,
+          healthAfter: health,
+          scoreAfter: nextScore.score,
+          allDefensesOn,
+        })
+      )
+      newlyCompleted.forEach((mission) =>
+        record(missionCompletedEvent({ missionId: mission.id ?? mission }))
+      )
     },
-    [progress, ruleStates, scoreState, worldHealth]
+    [progress, record, ruleStates, scoreState, worldHealth]
   )
 
   useEffect(() => {
@@ -232,10 +296,14 @@ export default function CyberDistrict({ onExit }) {
         <IncidentPanel
           worldHealth={worldHealth}
           onRiskChange={(delta) => setRiskOffset((current) => current + delta)}
-          onIncidentResolved={({ appropriateContainment, rootCauseCorrect }) => {
+          onIncidentResolved={({ appropriateContainment, caseId, rootCauseCorrect, seconds }) => {
             // A clean response repays some world health; a poor one does not.
             if (rootCauseCorrect && appropriateContainment) applyHealthDelta(5)
+            record(incidentClosedEvent({ caseId, outcome: 'resolved', seconds }))
           }}
+          onIncidentEscalated={({ caseId, seconds }) =>
+            record(incidentClosedEvent({ caseId, outcome: 'escalated', seconds }))
+          }
         />
       </section>
 

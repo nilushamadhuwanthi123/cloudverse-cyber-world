@@ -405,3 +405,44 @@
     min-width: 0;
   }
 }
+
+/*
+ * Escalation.
+ *
+ * Deliberately quieter than the primary action: it is a valid outcome,
+ * not the expected one. Amber rather than red -- handing a case up is
+ * not an error, and colouring it as one would discourage the correct
+ * call. The label says "Escalate", so the colour is never carrying the
+ * meaning on its own.
+ */
+.incident-panel__escalate {
+  display: inline-block;
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--status-warning);
+  background: transparent;
+  border: 1px solid var(--status-warning);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.incident-panel__escalate:hover {
+  background: rgba(255, 181, 71, 0.10);
+}
+
+.incident-panel__escalated-note {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .incident-panel__escalate {
+    transition: none !important;
+  }
+}
