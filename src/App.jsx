@@ -1,20 +1,30 @@
 import { useState } from 'react'
 import IntroScreen from './features/intro/IntroScreen'
+import WorldMap from './features/world/WorldMap'
 import CyberDistrict from './features/cyber/CyberDistrict'
 import CloudDistrict from './features/cloud/CloudDistrict'
 import DevOpsPipeline from './features/devops/DevOpsPipeline'
 import './App.css'
 
 /**
- * Application shell with District Switcher.
+ * Application shell with Central World Map and District Switcher.
  *
- * Allows exploration of Cloud District (District 01),
- * DevOps District (District 02), and Cyber District (District 03)
- * until the full Phase 4 World Map is implemented.
+ * Implements the intended navigation flow:
+ * INTRO -> ENTER WORLD -> WORLD MAP -> SELECT DISTRICT -> ENTER DISTRICT -> BACK TO WORLD MAP
  */
 export default function App() {
   const [entered, setEntered] = useState(false)
-  const [district, setDistrict] = useState('cloud')
+  const [view, setView] = useState('map') // 'map' | 'cloud' | 'devops' | 'cyber'
+
+  const handleEnterWorld = () => {
+    setEntered(true)
+    setView('map')
+  }
+
+  const handleExitToIntro = () => {
+    setEntered(false)
+    setView('map')
+  }
 
   return (
     <>
@@ -35,11 +45,22 @@ export default function App() {
             <button
               type="button"
               role="tab"
-              id="tab-cloud"
-              aria-selected={district === 'cloud'}
+              id="tab-map"
+              aria-selected={view === 'map'}
               aria-controls="main-content"
-              className={`district-nav__tab ${district === 'cloud' ? 'district-nav__tab--active' : ''}`}
-              onClick={() => setDistrict('cloud')}
+              className={`district-nav__tab ${view === 'map' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setView('map')}
+            >
+              🗺️ World Map
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-cloud"
+              aria-selected={view === 'cloud'}
+              aria-controls="main-content"
+              className={`district-nav__tab ${view === 'cloud' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setView('cloud')}
             >
               ☁️ Cloud District
             </button>
@@ -47,10 +68,10 @@ export default function App() {
               type="button"
               role="tab"
               id="tab-devops"
-              aria-selected={district === 'devops'}
+              aria-selected={view === 'devops'}
               aria-controls="main-content"
-              className={`district-nav__tab ${district === 'devops' ? 'district-nav__tab--active' : ''}`}
-              onClick={() => setDistrict('devops')}
+              className={`district-nav__tab ${view === 'devops' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setView('devops')}
             >
               ⚡ DevOps District
             </button>
@@ -58,10 +79,10 @@ export default function App() {
               type="button"
               role="tab"
               id="tab-cyber"
-              aria-selected={district === 'cyber'}
+              aria-selected={view === 'cyber'}
               aria-controls="main-content"
-              className={`district-nav__tab ${district === 'cyber' ? 'district-nav__tab--active' : ''}`}
-              onClick={() => setDistrict('cyber')}
+              className={`district-nav__tab ${view === 'cyber' ? 'district-nav__tab--active' : ''}`}
+              onClick={() => setView('cyber')}
             >
               🛡️ Cyber District
             </button>
@@ -70,22 +91,27 @@ export default function App() {
           <button
             type="button"
             className="district-nav__exit-btn"
-            onClick={() => setEntered(false)}
+            onClick={view === 'map' ? handleExitToIntro : () => setView('map')}
           >
-            &larr; Exit to Intro
+            {view === 'map' ? '← Exit to Intro' : '← Back to World Map'}
           </button>
         </nav>
       )}
 
       <main id="main-content" tabIndex={-1}>
         {!entered ? (
-          <IntroScreen onEnter={() => setEntered(true)} />
-        ) : district === 'cloud' ? (
-          <CloudDistrict onBackToIntro={() => setEntered(false)} />
-        ) : district === 'devops' ? (
-          <DevOpsPipeline onBackToIntro={() => setEntered(false)} />
+          <IntroScreen onEnter={handleEnterWorld} />
+        ) : view === 'map' ? (
+          <WorldMap
+            onSelectDistrict={(districtId) => setView(districtId)}
+            onExitToIntro={handleExitToIntro}
+          />
+        ) : view === 'cloud' ? (
+          <CloudDistrict onBackToIntro={() => setView('map')} />
+        ) : view === 'devops' ? (
+          <DevOpsPipeline onBackToIntro={() => setView('map')} />
         ) : (
-          <CyberDistrict onExit={() => setEntered(false)} />
+          <CyberDistrict onExit={() => setView('map')} />
         )}
       </main>
     </>
