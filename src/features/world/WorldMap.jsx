@@ -586,6 +586,10 @@ export default function WorldMap({
           className="world-map__inspector"
           role="region"
           aria-labelledby="district-inspector-title"
+          /* The panel scrolls when a district's briefing runs long. A
+             scrollable region that cannot take focus is unreachable by
+             keyboard -- there is no way to scroll it without a mouse. */
+          tabIndex={0}
         >
           <div className="world-map__inspector-content">
             {/* Header / Sector Tag */}
