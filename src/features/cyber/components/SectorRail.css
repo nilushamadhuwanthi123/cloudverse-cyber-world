@@ -1,0 +1,109 @@
+/*
+ * Sector rail.
+ *
+ * Status is written as a word on every row -- ONLINE, LOCKED, OFFLINE --
+ * so the rail reads correctly with the colour removed. The colour is the
+ * second signal, never the only one.
+ */
+
+.sector-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sector-rail__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.sector-rail__item:hover {
+  background: var(--surface-2);
+}
+
+.sector-rail__item--selected {
+  background: var(--surface-2);
+  border-color: var(--border-subtle);
+  border-left-color: var(--district-cyber-primary);
+}
+
+/* Not `disabled`: these stay focusable and selectable so choosing one
+   explains itself. aria-disabled carries the state to assistive tech. */
+.sector-rail__item--locked,
+.sector-rail__item--planned {
+  opacity: 0.72;
+}
+
+.sector-rail__item--locked { border-left-color: var(--status-warning); }
+.sector-rail__item--planned { border-left-color: var(--border-strong); }
+
+.sector-rail__code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.sector-rail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sector-rail__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.sector-rail__tagline {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.sector-rail__state {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+}
+
+.sector-rail__state--online  { color: var(--status-stable); }
+.sector-rail__state--locked  { color: var(--status-warning); }
+.sector-rail__state--planned { color: var(--text-secondary); }
+
+@media (max-width: 900px) {
+  .sector-rail {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+  }
+
+  .sector-rail__item {
+    width: auto;
+    min-width: 15rem;
+    flex: 0 0 auto;
+    border-left-width: 0;
+    border-top: 2px solid var(--border-strong);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+
+  .sector-rail__item--selected { border-top-color: var(--district-cyber-primary); }
+  .sector-rail__item--locked { border-top-color: var(--status-warning); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sector-rail__item { transition: none !important; }
+}

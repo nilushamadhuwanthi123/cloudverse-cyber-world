@@ -285,3 +285,108 @@
     gap: var(--space-2);
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Sector shell (Phase 4).
+ *
+ * The district reads as a rail plus a stage rather than one long page.
+ * On narrow screens the rail becomes a horizontal strip above the stage
+ * instead of a sidebar squeezed to nothing.
+ * ------------------------------------------------------------------ */
+
+.cyber-district__shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 901px) {
+  .cyber-district__shell {
+    grid-template-columns: minmax(16rem, 20rem) 1fr;
+  }
+}
+
+.cyber-district__tally {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-secondary);
+}
+
+.cyber-district__stage {
+  min-width: 0;
+}
+
+/* The stage is a tabpanel, so it is focusable. Give that focus a visible
+   ring rather than letting the browser's default land on a large box. */
+.cyber-district__stage:focus-visible {
+  outline: 2px solid var(--district-cyber-primary);
+  outline-offset: 6px;
+  border-radius: var(--radius-md);
+}
+
+.cyber-district__stage-head {
+  margin-bottom: var(--space-5);
+}
+
+.cyber-district__stage-code {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  color: var(--district-cyber-primary);
+}
+
+.cyber-district__stage-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xl);
+  line-height: 1.15;
+}
+
+.cyber-district__stage-summary {
+  margin: 0;
+  max-width: 64ch;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Unavailable sectors say which kind of unavailable they are in words,
+   in the status line, before any colour is involved. */
+.cyber-district__unavailable {
+  padding: var(--space-5);
+  background: var(--surface-1);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.cyber-district__unavailable-status {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wider);
+}
+
+.cyber-district__unavailable--locked .cyber-district__unavailable-status {
+  color: var(--status-warning);
+}
+
+.cyber-district__unavailable--planned .cyber-district__unavailable-status {
+  color: var(--text-secondary);
+}
+
+.cyber-district__unavailable-reason {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Embedded in the sector stage: the stage head already names it, so the
+   analytics screen drops its own outer padding and max-width. */
+.ops--embedded {
+  padding: 0;
+  max-width: none;
+}
