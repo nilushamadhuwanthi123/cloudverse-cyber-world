@@ -50,29 +50,54 @@ export const DEFENSE_RULES = Object.freeze([
     description: 'Automatically restarts a core service if it stops responding.',
   }),
 ])
+// The catalogue is the single source of truth for which rules exist.
+// Every reading below is derived from these ids rather than from the
+// keys a caller's object happens to carry, so a saved payload that is
+// missing a rule -- or still carrying one that was renamed away -- can
+// never be read as protection the player does not have.
+const RULE_IDS = DEFENSE_RULES.map((rule) => rule.id)
+
+/**
+ * Reads one rule out of a possibly partial state map.
+ *
+ * A missing id reads as OFF, which is exactly what the panel already
+ * renders for it. Anything not in the catalogue is ignored.
+ */
+export function isRuleActive(ruleStates, ruleId) {
+  return Boolean(ruleStates?.[ruleId])
+}
+
+/** The catalogue ids that are currently ON. */
+export function activeRuleIds(ruleStates = {}) {
+  return RULE_IDS.filter((id) => isRuleActive(ruleStates, id))
+}
+
+/** True only when every rule in the catalogue is ON. */
+export function allRulesActive(ruleStates = {}) {
+  return activeRuleIds(ruleStates).length === RULE_IDS.length
+}
 
 /**
  * Returns a fresh map with all four rules initially set to ON (true).
  */
 export function getInitialRuleStates() {
-  return Object.fromEntries(DEFENSE_RULES.map((rule) => [rule.id, true]))
+  return Object.fromEntries(RULE_IDS.map((id) => [id, true]))
 }
 
 /**
  * Calculates the number of active rules.
  */
 export function getActiveRulesCount(ruleStates = {}) {
-  return Object.values(ruleStates).filter(Boolean).length
+  return activeRuleIds(ruleStates).length
 }
 
 /**
  * Calculates defense protection coverage percentage (0 - 100).
  */
 export function getProtectionCoverage(ruleStates = {}) {
-  const total = DEFENSE_RULES.length
+  const total = RULE_IDS.length
   if (total === 0) return 0
-  const active = getActiveRulesCount(ruleStates)
-  return Math.round((active / total) * 100)
+  return Math.round((getActiveRulesCount(ruleStates) / total) * 100)
 }
 
 /**
@@ -83,7 +108,7 @@ export function getProtectionCoverage(ruleStates = {}) {
  */
 export function getDefenseStatus(ruleStates = {}) {
   const activeCount = getActiveRulesCount(ruleStates)
-  if (activeCount === DEFENSE_RULES.length) {
+  if (activeCount === RULE_IDS.length) {
     return OVERALL_DEFENSE_STATUS.FULLY_ACTIVE
   }
   if (activeCount === 0) {
@@ -93,10 +118,13 @@ export function getDefenseStatus(ruleStates = {}) {
 }
 
 /**
- * Returns true if ANY defense rule is OFF, triggering world health decay.
+ * Returns true if ANY defense rule is not ON, triggering world health
+ * decay. Phrased as "not all active" rather than "some are false" so a
+ * rule that is absent from the map counts against the player the same
+ * way the panel shows it: DISABLED.
  */
 export function shouldDecayHealth(ruleStates = {}) {
-  return Object.values(ruleStates).some((isOn) => !isOn)
+  return !allRulesActive(ruleStates)
 }
 
 /**

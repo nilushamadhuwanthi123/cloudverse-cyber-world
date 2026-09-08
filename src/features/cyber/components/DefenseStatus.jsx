@@ -7,8 +7,7 @@ import {
   getProtectionCoverage,
   getDefenseStatus,
   shouldDecayHealth,
-  DECAY_INTERVAL_MS,
-  DECAY_AMOUNT,
+  createDecayInterval,
 } from '../../../game/defenseRules'
 import './DefenseStatus.css'
 
@@ -48,17 +47,15 @@ export default function DefenseStatus({ ruleStates, onToggleRule, onHealthChange
     }
   }
 
-  // Health Decay Interval: exactly -1 every 3 seconds while ANY rule is OFF
-  useEffect(() => {
-    const hasOffRule = shouldDecayHealth(activeRuleStates)
-    if (!hasOffRule || typeof onHealthChange !== 'function') return undefined
-
-    const intervalId = setInterval(() => {
-      onHealthChange(-DECAY_AMOUNT)
-    }, DECAY_INTERVAL_MS)
-
-    return () => clearInterval(intervalId)
-  }, [activeRuleStates, onHealthChange])
+  // Health Decay Interval: exactly -1 every 3 seconds while ANY rule is
+  // not ON. The timing rule itself lives in game/defenseRules.js -- this
+  // effect only starts it and returns its own stop function as cleanup,
+  // so the panel and the rules module can never drift apart on when or
+  // how fast health leaks.
+  useEffect(
+    () => createDecayInterval(activeRuleStates, onHealthChange),
+    [activeRuleStates, onHealthChange]
+  )
 
   const activeCount = getActiveRulesCount(activeRuleStates)
   const coveragePercent = getProtectionCoverage(activeRuleStates)

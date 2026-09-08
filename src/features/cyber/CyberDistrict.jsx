@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { stagger } from 'animejs'
-import { DEFENSE_RULES } from '../../game/defenseRules'
+import { allRulesActive, getInitialRuleStates } from '../../game/defenseRules'
 import { clampWorldHealth, INITIAL_WORLD_HEALTH } from '../../game/threatEngine'
 import { applyResponseToScore, INITIAL_SECURITY_SCORE_STATE } from '../../game/securityScore'
 import { INITIAL_PROGRESS, missionsWithStatus, recordResponse } from '../../game/missionState'
@@ -20,8 +20,6 @@ import ThreatPanel from './components/ThreatPanel'
 import './CyberDistrict.css'
 
 const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical']
-
-const allRulesOn = () => Object.fromEntries(DEFENSE_RULES.map((rule) => [rule.id, true]))
 
 /**
  * Cyber District.
@@ -45,7 +43,7 @@ export default function CyberDistrict({ onExit }) {
   const [activeSeverity, setActiveSeverity] = useState('low')
   const [worldHealth, setWorldHealth] = useState(INITIAL_WORLD_HEALTH)
   const [scoreState, setScoreState] = useState(INITIAL_SECURITY_SCORE_STATE)
-  const [ruleStates, setRuleStates] = useState(allRulesOn)
+  const [ruleStates, setRuleStates] = useState(getInitialRuleStates)
   const [progress, setProgress] = useState(INITIAL_PROGRESS)
   const [justCompleted, setJustCompleted] = useState([])
   // Containment decisions move exposure directly, so risk needs an input
@@ -92,7 +90,7 @@ export default function CyberDistrict({ onExit }) {
         streak: nextScore.streak,
         securityScore: nextScore.score,
         worldHealth: health,
-        allDefensesOn: Object.values(ruleStates).every(Boolean),
+        allDefensesOn: allRulesActive(ruleStates),
       })
 
       setProgress(nextProgress)

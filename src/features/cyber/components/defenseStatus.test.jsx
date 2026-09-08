@@ -236,4 +236,24 @@ describe('DefenseStatus Component Rendering & Accessibility', () => {
     expect(html).toContain('0% COVERAGE')
     expect(html).toContain('-1 / 3s')
   })
+
+  // Regression: the header readings and the decay banner used to be
+  // computed from whatever keys the map carried, while each rule row was
+  // drawn from the catalogue. A saved map missing a rule therefore drew
+  // that rule as DISABLED next to a banner saying health was protected.
+  it('does not contradict itself when a saved map is missing a rule', () => {
+    const partial = { ...getInitialRuleStates() }
+    delete partial['service-watchdog']
+
+    const html = renderToString(
+      <DefenseStatus ruleStates={partial} onToggleRule={() => {}} onHealthChange={() => {}} />
+    )
+
+    expect(html).toContain('aria-label="Service Watchdog — OFF"')
+    expect(html).toContain('3 / 4 RULES ACTIVE')
+    expect(html).toContain('75% COVERAGE')
+    expect(html).toContain('DEGRADED')
+    expect(html).toContain('DEFENSE INTEGRITY LEAKING')
+    expect(html).not.toContain('WORLD HEALTH PROTECTED')
+  })
 })
