@@ -4,8 +4,8 @@
  * Encapsulated locally within features/cloud/ to adhere to architecture rules:
  * components never import directly from data/ or storage/.
  *
- * Step 2: Enriched fictional technical telemetry and infrastructure metrics
- * for Compute Island, Storage Valley, and Database Lake.
+ * Step 2 & 3: Structured fictional telemetry, hardware fabric specs,
+ * architectural capabilities, and simulated operational metrics.
  */
 
 export const CLOUD_LOCATIONS = [
@@ -20,7 +20,16 @@ export const CLOUD_LOCATIONS = [
     status: 'ACTIVE // NOMINAL',
     statusVariant: 'stable',
     coordinates: 'GRID // 42.10 N · 18.44 E',
-    metrics: [
+    actionConfig: {
+      actionId: 'scale-up',
+      label: 'SCALE UP',
+      activeLabel: 'ORCHESTRATING MESH...',
+      completedLabel: 'SCALING COMPLETE',
+      maxLabel: 'MAX CLUSTER CAPACITY',
+      description: 'Provision +2 elastic container instances to alleviate cluster pressure',
+    },
+    // Base nominal metrics before operation
+    baseMetrics: [
       {
         id: 'cpu-usage',
         label: 'CPU Usage',
@@ -100,7 +109,16 @@ export const CLOUD_LOCATIONS = [
     status: 'SYNCED // REPLICATED',
     statusVariant: 'stable',
     coordinates: 'GRID // 38.82 N · 24.19 E',
-    metrics: [
+    actionConfig: {
+      actionId: 'optimize-storage',
+      label: 'OPTIMIZE STORAGE',
+      activeLabel: 'COMPACTING VAULTS...',
+      completedLabel: 'STORAGE OPTIMIZED',
+      maxLabel: 'ZERO UNCLAIMED BLOCKS',
+      description: 'Run block-level deduplication and automated cold-tier migration',
+    },
+    // Base nominal metrics before operation
+    baseMetrics: [
       {
         id: 'total-capacity',
         label: 'Total Capacity',
@@ -192,7 +210,16 @@ export const CLOUD_LOCATIONS = [
     status: 'OPTIMIZED // STREAMING',
     statusVariant: 'stable',
     coordinates: 'GRID // 45.67 N · 31.05 E',
-    metrics: [
+    actionConfig: {
+      actionId: 'optimize-database',
+      label: 'OPTIMIZE DATABASE',
+      activeLabel: 'REINDEXING & ANALYZING...',
+      completedLabel: 'DATABASE OPTIMIZED',
+      maxLabel: 'INDEXES TUNED',
+      description: 'Rebuild query plan caches and prune stale connection pool threads',
+    },
+    // Base nominal metrics before operation
+    baseMetrics: [
       {
         id: 'database-engine',
         label: 'Database Engine',
