@@ -1,54 +1,91 @@
 # CLOUDVERSE — Testing
 
-## What is tested, and why that line
+*Counts in this document were taken from `npm test` on 2026-09-08 and
+match the badge on the README. If they disagree, the test run is right
+and this file is stale — please open an issue.*
 
-The tests cover `game/`, `services/` and `storage/` — the layers that
-hold rules, the data seam, and persistence. They do not cover components.
+## What is tested
 
-That split is deliberate rather than lazy. The interesting failures in
-this project are rule failures: a mission unlocking out of order, a
-streak bonus that keeps paying after a wrong answer, saved progress that
-a later build cannot read. Those are decisions, and a decision can be
-stated as an example — given this progress, that mission is still
-locked. Component tests would mostly assert that a `<span>` renders text
-that a `game/` function already returned, which is a slower way to test
-the same rule.
+**397 tests across 27 files.** The suite is not evenly spread, and that
+is deliberate:
 
-Keeping rules framework-free (the architecture doc's reason for `game/`
-existing at all) is what makes this possible: every test here is plain
-function in, value out, with no DOM and no React.
+| Layer | Files | Tests | What is asserted |
+|---|---:|---:|---|
+| `game/` — the rules | 15 | 263 | Threat lifecycle and severity, defense rules, security score and its streak cap, risk, mission unlock order, incident lifecycle, evidence correlation, containment trade-offs, forensic connection derivation, network traffic judgement, intelligence correlation, sector availability, the event log and its analytics |
+| `features/`, `components/` — the UI | 8 | 91 | Rendered output of the World Map, Defense Status, the Cloud↔DevOps bridge, the sector rail, the boot sequence, the event feed, system status, the analytics charts, and the DevOps pipeline |
+| `lib/` — presentation maths | 2 | 22 | Sparkline and stacked-segment geometry, cursor state resolution |
+| `services/` — the async seam | 1 | 11 | Round-trip, migration from an older saved shape, unknown mission ids, wrong types |
+| `storage/` — persistence | 1 | 10 | Privacy mode, quota exhaustion, corrupted JSON, not clearing another app's keys |
 
-## Running them
+An earlier version of this document said components were not tested.
+That was true when it was written and stopped being true several
+features ago; the eight component test files above are the correction.
+
+## What component tests do and do not do here
+
+They render to a string with `renderToString` and assert on the output.
+That is enough to pin the things worth pinning:
+
+- **Semantics.** That the sector rail is a real `tablist` with one tab
+  in the tab order, that the event feed's scrolling list is reachable by
+  keyboard, that a switch reports `aria-checked`.
+- **Wording.** That a state is stated in text and not only in colour —
+  `LOCKED` vs `OFFLINE`, `Blocked — but it was legitimate`.
+- **Contradictions.** That the Defense Status header cannot say
+  `FULLY ACTIVE` while a rule row says `DISABLED`.
+
+They do **not** exercise click handlers, effects, timers or focus
+movement, because nothing here mounts into a DOM. Those behaviours are
+checked in a real browser instead (below), and that split is the honest
+description of the coverage rather than a claim that the components are
+"tested" without qualification.
+
+## What is checked in a real browser, not by the suite
+
+A Playwright + axe-core script drives the production behaviour that
+string rendering cannot reach. This is a manual step, not part of CI:
+
+- Keyboard navigation of the sector rail (arrows, `Home`, `End`, roving
+  tabindex)
+- The boot sequence, and that `prefers-reduced-motion` skips it entirely
+  rather than playing it faster
+- A full round of play: threat responses moving world health, the
+  Incident Response gate opening, tracing a forensic chain, judging
+  captured traffic, and the resulting events reaching the feed
+- The cursor's six states, and its absence on a coarse pointer
+- Horizontal overflow at 400px
+
+## Running it
 
 ```bash
-npm test          # once
-npm run test:watch
+npm test            # once
+npm run test:watch  # while working
+npm run lint
+npm run build
 ```
 
-## What each file covers
+CI runs `lint`, `test` and `build` on every pull request and on pushes
+to `main` — see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 
-| File | Covers |
-|---|---|
-| `game/missionState.test.js` | Unlock order, goal evaluation, the fixed-point settle, immutability |
-| `game/securityScore.test.js` | Base points, streak bonus and its cap, reset on a wrong answer, the zero floor |
-| `game/threatEngine.test.js` | Threat lifecycle, severity escalation, weighted generation, response resolution |
-| `storage/localStore.test.js` | Privacy mode, quota exhaustion, corrupted JSON, not clearing other apps' keys |
-| `services/progressService.test.js` | Round-trip, migration from an older saved shape, unknown mission ids, wrong types |
+## Why the rules layer carries most of the weight
 
-## The cases worth keeping
+`game/` is framework-free — no JSX, no DOM, no `localStorage`. That is
+what makes it possible to assert a rule as a plain function rather than
+through a rendered component, and it is why most of the suite lives
+there. A few of those tests exist because the failure they describe is
+easy to reintroduce and hard to notice:
 
-A few tests exist because the failure they describe is easy to
-reintroduce and quiet when it happens:
+- A saved payload written by an older build must degrade to defaults
+  field by field, not be thrown away wholesale.
+- Locked and not-yet-built must stay distinguishable, or the rail
+  promises something no amount of play will deliver.
+- Blocking legitimate traffic must cost something, or the model teaches
+  the player to block everything.
 
-- **A met goal on a locked mission stays locked.** Otherwise a lucky
-  early streak skips the chain the missions are meant to teach.
-- **Storage failures degrade to a fresh playable session.** A browser in
-  privacy mode throws on `localStorage` access itself, so a version that
-  only guarded the parse would still take the page down.
-- **A saved shape from an older build still loads.** Progress is written
-  by whichever version the player last ran, not the one they open next.
-- **The streak resets on a wrong answer.** Without it, one early run of
-  correct answers keeps paying a bonus forever.
+## Known gaps
 
-Each of those is a real behaviour someone could remove while every other
-test still passed.
+- No end-to-end test runs in CI. The browser checks above are run by
+  hand before a release and their results are quoted in the pull request
+  that introduced them.
+- No visual regression testing.
+- Component tests do not cover interaction, as described above.
