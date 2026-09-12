@@ -281,7 +281,7 @@ explanation, correct or not, because the point is to learn why a response
 fits — not to be scored and moved along.
 
 **Rules live outside React.** `game/` holds no JSX, no DOM and no
-`localStorage`, which is why 77 tests can cover the interesting behaviour
+`localStorage`, which is why 397 tests can cover the interesting behaviour
 as plain function-in, value-out. The failures worth catching in a project
 like this are rule failures — a mission unlocking out of order, a streak
 bonus that keeps paying after a mistake — and those are cheapest to test
